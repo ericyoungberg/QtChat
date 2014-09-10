@@ -63,7 +63,6 @@ MainWindow::MainWindow() {
   connect(sendMessageButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
   connect(addContactButton, SIGNAL(clicked()), this, SLOT(showAddContact()));
   connect(userInput, SIGNAL(enterKeyPressed()), this, SLOT(sendMessage()));
-  connect(addContactDialog, SIGNAL(userFound(QString)), this, SLOT(addUserToContacts(QString)));
 
   
   // SETUP
@@ -75,6 +74,8 @@ MainWindow::MainWindow() {
 
   // NULL initialize the dialogs to speed up launch and preserve memory
   addContactDialog = 0;
+
+  
 
   setCentralWidget(window);           // own it
 }
@@ -95,6 +96,7 @@ void MainWindow::showAddContact() {
   // Check if the dialog exists yet
   if(!addContactDialog) {
     addContactDialog = new NewContactDialog(this); // Initialize the dialog
+    connect(addContactDialog, SIGNAL(foundUser(QString)), this, SLOT(addUserToContacts(QString)));
   }
 
   addContactDialog->clearText(); // Reset the dialog for a new entry
