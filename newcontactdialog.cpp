@@ -74,5 +74,6 @@ void NewContactDialog::clearText() {
 // Try to find an account online through the IP address entered by the user
 void NewContactDialog::findUser() {
   emit foundUser(addressInput->text());
+  close();
 }
 // (END) findUser

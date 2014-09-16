@@ -18,6 +18,9 @@ class QTextBrowser;
 class QLabel;
 class NewContactDialog;
 class ChatInput;
+class QAction;
+class ChatSettings;
+class QString;
 
 class MainWindow : public QMainWindow 
 {
@@ -29,8 +32,18 @@ private slots:
   void showAddContact();
   void sendMessage();
   void addUserToContacts(QString userAddress);
+  void removeSelectedContact();
+  void startConversation();
+  void deleteHistory();
+  void closeConversation();
+  void quitApp();
+  void openSettings();
+  void setEnvironment();
 private:
   bool inputIsEmpty();
+
+   QString userName;
+   QString realName;
 
    QHBoxLayout *mainLayout; 
    QHBoxLayout *inputLayout;
@@ -43,6 +56,8 @@ private:
 
    ChatInput *userInput;
 
+   ChatSettings *settingsDialog;
+
    QPushButton *sendMessageButton;
    QPushButton *addContactButton;
 
@@ -51,6 +66,17 @@ private:
    QLabel *contactLabel;
 
    NewContactDialog *addContactDialog;
+
+   QMenu *fileMenu;
+   QMenu *editMenu;
+
+   QAction *addAction;
+   QAction *removeAction;
+   QAction *startAction;
+   QAction *deleteHistoryAction;
+   QAction *closeAction;
+   QAction *quitAction;
+   QAction *settingsAction;
 };
 
 #endif
