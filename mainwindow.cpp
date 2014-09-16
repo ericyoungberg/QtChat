@@ -290,6 +290,8 @@ void MainWindow::openSettings() {
     connect(settingsDialog, SIGNAL(settingsUpdated()), this, SLOT(setEnvironment()));
   }  
 
+  settingsDialog->loadSettings();   // Reset LineEdits to the current settings
+
   settingsDialog->setModal(true);   // Keep focus on this window
   settingsDialog->show();
   settingsDialog->activateWindow();

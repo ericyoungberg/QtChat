@@ -58,8 +58,6 @@ ChatSettings::ChatSettings(QWidget *parent) : QDialog(parent) {
   // SETUP
   // =================================
 
-  loadSettings();          // Load the settings file
-
   setLayout(mainLayout);
   setWindowTitle(tr("Settings"));
   setFixedSize(200, 400);
