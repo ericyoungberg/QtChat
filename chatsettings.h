@@ -15,9 +15,10 @@ class ChatSettings : public QDialog
 
 public:
     ChatSettings(QWidget *parent = 0);
+public slots:
+  void loadSettings();
 private slots:
   void saveSettings();
-  void loadSettings();
 signals:
   void settingsUpdated();
 private:
