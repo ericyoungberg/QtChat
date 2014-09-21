@@ -10,6 +10,18 @@
 #include <newcontactdialog.h>
 #include <chatinput.h>
 #include <chatsettings.h>
+#include <fstream>
+
+using namespace std;
+
+
+// ENVIRONMENT
+
+#define CONTACTS_FILE "resources/contacts"
+#define SETTINGS_FILE "resources/settings.ini"
+
+
+// (end) ENVIRONMENT
 
 // CLASS: MainWindow
 // Holds everything in the application
@@ -190,9 +202,31 @@ bool MainWindow::inputIsEmpty() {
 // METHOD: setEnvironment
 // Loads the settings file
 void MainWindow::setEnvironment() {
-  QSettings settings("resources/settings.ini", QSettings::IniFormat);
+
+  // Load the settings
+  QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
   userName = settings.value("user_name", "").toString();
   realName = settings.value("real_name", "").toString();
+
+  // Load the contacts
+  ifstream contactsFile;
+  contactsFile.open(CONTACTS_FILE);
+
+  // Placeholders
+  char rawIP[15];
+
+  // Make sure file is open before reading
+  if(contactsFile.is_open()) {
+    contactsFile >> rawIP;
+    // Read until the end of file
+    while(!contactsFile.eof()) {
+      contactList->addItem(rawIP);
+      contactsFile >> rawIP;
+    }
+
+    // Close the contacts file
+    contactsFile.close(); 
+  }
 }
 // (END) setEnvironment
 
@@ -227,6 +261,22 @@ void MainWindow::showAddContact() {
 // If a user is found the the 'NewContactDialog', the user is added to the
 // contact list
 void MainWindow::addUserToContacts(QString userAddress) {
+
+  // Create an output file stream to write to the Contacts file
+  ofstream contactsFile;
+  contactsFile.open(CONTACTS_FILE, ios::out | ios::app);  // Make sure we append the output
+
+  // Make sure it is open before writing
+  if(contactsFile.is_open()) {
+    QByteArray ba = userAddress.toLocal8Bit();
+    char* userAddressRaw = ba.data();
+    contactsFile << userAddressRaw << endl;    // Write to the file
+    contactsFile.close();           // Close the file
+  } else {
+    // WILL HANDLE ERROR 
+  }
+
+  // Append the user to GUI contact list
   contactList->addItem(userAddress);
 }
 // (END) addUserToContacts
@@ -239,13 +289,49 @@ void MainWindow::removeSelectedContact() {
 
   // Find the selected item(s)
   QList<QListWidgetItem*> selected = contactList->selectedItems();
+  QListWidgetItem *selectedItem = selected.at(0);
+
+  // Delete the user from the contacts file
+  // Read from the current contact file
+  ifstream contactsFile;
+  contactsFile.open(CONTACTS_FILE, ios::in);
+
+  // Using temporary file to transfer contacts that will be staying with the user
+  ofstream tempFile;
+  tempFile.open(".tempdata", ios::out);
+
+  char IP[15];  // Input placeholder
+
+  // Make sure both files are open before performing any action
+  if(contactsFile.is_open() && tempFile.is_open()) {
+    contactsFile >> IP; 
+    while(!contactsFile.eof()) {
+
+      // If the IP address read from CONTACTS_FILE is not the IP selected,
+      // write it to the temporary data file
+      if(IP != selectedItem->text())
+        tempFile << IP << endl;
+
+      contactsFile >> IP;   // Read next IP address until end of file 
+    } 
+
+    // Close both files
+    contactsFile.close(); 
+    tempFile.close();
+    
+    // Replace the old contacts file with the temporary data
+    remove(CONTACTS_FILE);
+    rename(".tempdata", CONTACTS_FILE);
+  }
 
   // Find the selected item in the list and then remove it
-  for(int i=0;i<contactList->count();i++)
-    if(contactList->item(i) == selected.at(0)) {
+  for(int i=0;i<contactList->count();i++) {
+    if(contactList->item(i) == selectedItem) {
       contactList->takeItem(i);                       // take
-      contactList->removeItemWidget(selected.at(0));  // delete
+      contactList->removeItemWidget(selectedItem);  // delete
     }
+  }
+
 }
 // (END) removeSelectedContact
 
