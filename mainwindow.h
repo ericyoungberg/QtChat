@@ -8,10 +8,13 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <string>
+
 
 class QHBoxLayout;
 class QVBoxLayout;
 class QListWidget;
+class QListWidgetItem;
 class QPushButton;
 class QTextEdit;
 class QTextBrowser;
@@ -21,6 +24,10 @@ class ChatInput;
 class QAction;
 class ChatSettings;
 class QString;
+class string;
+
+using std::string;
+
 
 class MainWindow : public QMainWindow 
 {
@@ -33,7 +40,7 @@ private slots:
   void sendMessage();
   void addUserToContacts(QString userAddress);
   void removeSelectedContact();
-  void startConversation();
+  void startConversation(QListWidgetItem*);
   void deleteHistory();
   void closeConversation();
   void quitApp();
@@ -44,6 +51,8 @@ private:
 
    QString userName;
    QString realName;
+
+   string currentConversation;
 
    QHBoxLayout *mainLayout; 
    QHBoxLayout *inputLayout;
@@ -72,7 +81,6 @@ private:
 
    QAction *addAction;
    QAction *removeAction;
-   QAction *startAction;
    QAction *deleteHistoryAction;
    QAction *closeAction;
    QAction *quitAction;

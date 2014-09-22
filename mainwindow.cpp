@@ -11,6 +11,8 @@
 #include <chatinput.h>
 #include <chatsettings.h>
 #include <fstream>
+#include <string>
+#include "helpers.h"
 
 using namespace std;
 
@@ -19,6 +21,7 @@ using namespace std;
 
 #define CONTACTS_FILE "resources/contacts"
 #define SETTINGS_FILE "resources/settings.ini"
+#define HIST_SUFFIX ".hist"
 
 
 // (end) ENVIRONMENT
@@ -46,11 +49,6 @@ MainWindow::MainWindow() {
   removeAction = new QAction(tr("Remove Contact"), this);
   removeAction->setShortcut(tr("Ctrl+r"));
   connect(removeAction, SIGNAL(triggered()), this, SLOT(removeSelectedContact()));
-
-  // Start Conversation
-  startAction = new QAction(tr("Start Conversation"), this);
-  startAction->setShortcut(tr("Ctrl+e"));
-  connect(removeAction, SIGNAL(triggered()), this, SLOT(startConversation()));
 
   // Delete Conversation History
   deleteHistoryAction = new QAction(tr("Delete Conversation History"), this);
@@ -88,7 +86,6 @@ MainWindow::MainWindow() {
   editMenu->addAction(addAction);
   editMenu->addAction(removeAction);
   editMenu->addSeparator();
-  editMenu->addAction(startAction);
   editMenu->addAction(closeAction);
   editMenu->addAction(deleteHistoryAction);
 
@@ -143,6 +140,7 @@ MainWindow::MainWindow() {
   connect(sendMessageButton, SIGNAL(clicked()), this, SLOT(sendMessage()));
   connect(addContactButton, SIGNAL(clicked()), this, SLOT(showAddContact()));
   connect(userInput, SIGNAL(enterKeyPressed()), this, SLOT(sendMessage()));
+  connect(contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(startConversation(QListWidgetItem*)));
 
   
   // SETUP
@@ -158,6 +156,8 @@ MainWindow::MainWindow() {
   // NULL initialize the dialogs to speed up launch and preserve memory
   addContactDialog = 0;
   settingsDialog = 0;
+
+  string currentConversation = "";    // The current conversations history file
 
 
   setCentralWidget(window);           // own it
@@ -268,8 +268,7 @@ void MainWindow::addUserToContacts(QString userAddress) {
 
   // Make sure it is open before writing
   if(contactsFile.is_open()) {
-    QByteArray ba = userAddress.toLocal8Bit();
-    char* userAddressRaw = ba.data();
+    char* userAddressRaw = stripQ(userAddress);
     contactsFile << userAddressRaw << endl;    // Write to the file
     contactsFile.close();           // Close the file
   } else {
@@ -338,7 +337,47 @@ void MainWindow::removeSelectedContact() {
 
 // METHOD: startConversation
 // Adds a new 'messageBox' to the stack
-void MainWindow::startConversation() {
+void MainWindow::startConversation(QListWidgetItem* item) {
+
+  string IPFileName;
+
+  // First, save current conversation if there is one to save
+  if(currentConversation.length() > 0) {
+    ofstream previousHistoryFile;
+    
+    IPFileName = "resources/hist/"+currentConversation;
+
+    previousHistoryFile.open((char*)IPFileName.c_str(), ios::out);
+    if(previousHistoryFile.is_open()) {
+      previousHistoryFile << stripQ(messageBox->toHtml()); 
+      previousHistoryFile.close();
+    }
+  }
+  
+
+  // Switch to the selected conversation
+  char* IP = stripQ(item->text());
+  currentConversation = appendSuffix(IP, HIST_SUFFIX); 
+
+  IPFileName = "resources/hist/"+currentConversation;
+
+  ifstream historyFile;
+  historyFile.open((char*)IPFileName.c_str(), ios::in);
+
+  string tempData;
+  QString qtemp;
+  if(historyFile.is_open()) {
+    historyFile >> tempData;
+    while(!historyFile.eof()) {
+      qtemp.append((char*)tempData.c_str()); 
+      historyFile >> tempData;
+    }
+    historyFile.close();
+    messageBox->setText(qtemp);
+  } else {
+    messageBox->setText("Just started a new conversation with "); 
+    messageBox->append((QString)IP);
+  }
 
 }
 // (END) startConversation
