@@ -7,8 +7,11 @@
 
 using namespace std;
 
+
+//----------------------------------------------------------------------
 // FUNCTION: stripQ
 // Filters all of the Qt specific stuff from a string
+//----------------------------------------------------------------------
 char* stripQ(QString str) {
   QByteArray ba = str.toLocal8Bit();
   return ba.data();
@@ -16,11 +19,14 @@ char* stripQ(QString str) {
 // (end) stripQ
 
 
-// FUNCTION: appendChars
-// Adds two character arrays together
-char* appendSuffix(char* ch1, const char* ch2) {
-  char* ch3 = new char[strlen(ch1)+strlen(ch2)+1];
-  strcpy(ch3, ch1);
-  strcat(ch3, ch2);
-  return ch3;
+//----------------------------------------------------------------------
+// FUNCTION: createFilePath
+// Adds three character arrays together
+//----------------------------------------------------------------------
+char* createFilePath(const char* ch1, char* ch2, const char* ch3) {
+  char* ch4 = new char[strlen(ch1)+strlen(ch2)+strlen(ch3)+1];
+  strcpy(ch4, ch1);
+  strcat(ch4, ch2);
+  strcat(ch4, ch3);
+  return ch4;
 }

@@ -24,7 +24,6 @@ class ChatInput;
 class QAction;
 class ChatSettings;
 class QString;
-class string;
 
 using std::string;
 
@@ -52,7 +51,8 @@ private:
    QString userName;
    QString realName;
 
-   string currentConversation;
+   char currentConversation[160];
+   bool hadPreviousConversation;
 
    QHBoxLayout *mainLayout; 
    QHBoxLayout *inputLayout;

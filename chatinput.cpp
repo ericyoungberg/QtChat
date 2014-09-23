@@ -8,8 +8,10 @@
 #include <chatinput.h>
 
 
+//----------------------------------------------------------------------
 // CLASS: ChatInput
 // The input box where the user types their messages to send
+//----------------------------------------------------------------------
 ChatInput::ChatInput() {
   setMaximumHeight(100); 
 }
@@ -22,8 +24,11 @@ ChatInput::ChatInput() {
  * ---------------------------|
 */
 
+
+//----------------------------------------------------------------------
 // METHOD: keyPressEvent
 // Overrides the protected key press event
+//----------------------------------------------------------------------
 void ChatInput::keyPressEvent(QKeyEvent *event) {
 
   // If the user presses the 'Enter' key while in the text box,

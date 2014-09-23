@@ -1,11 +1,18 @@
+/*
+ * FILE: chatsettings.cpp
+ * Declares the ChatSettings class along with all of its methods.
+ */
+
 #include <QtGui>
 #include <QtWidgets>
 #include <chatsettings.h>
 
 
+//----------------------------------------------------------------------
 // CLASS: ChatSettings
 // Creates the dialog for editing the applications settings and
 // user preferences
+//----------------------------------------------------------------------
 ChatSettings::ChatSettings(QWidget *parent) : QDialog(parent) {
 
   // LAYOUT
@@ -74,8 +81,11 @@ ChatSettings::ChatSettings(QWidget *parent) : QDialog(parent) {
  * ---------------------------|
 */
 
+
+//----------------------------------------------------------------------
 // METHOD: loadSettings
 // Loads the settings so that show the current information
+//----------------------------------------------------------------------
 void ChatSettings::loadSettings() {
   QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
   userNameEdit->setText(settings.value("user_name", "").toString());
@@ -84,9 +94,11 @@ void ChatSettings::loadSettings() {
 // (END) loadSettings
 
 
+//----------------------------------------------------------------------
 // METHOD: saveSettings
 // Emits a signal to the rest of the application so it can right the new
 // information to the settings file
+//----------------------------------------------------------------------
 void ChatSettings::saveSettings() {
   QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
   settings.setValue("user_name", userNameEdit->text());
@@ -96,12 +108,3 @@ void ChatSettings::saveSettings() {
   close();
 }
 // (END) saveSettings
-
-
-
-
-
-
-
-
-

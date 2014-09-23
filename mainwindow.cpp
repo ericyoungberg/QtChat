@@ -11,7 +11,6 @@
 #include <chatinput.h>
 #include <chatsettings.h>
 #include <fstream>
-#include <string>
 #include "helpers.h"
 
 using namespace std;
@@ -22,12 +21,16 @@ using namespace std;
 #define CONTACTS_FILE "resources/contacts"
 #define SETTINGS_FILE "resources/settings.ini"
 #define HIST_SUFFIX ".hist"
-
+#define HIST_PREFIX "resources/hist/"
 
 // (end) ENVIRONMENT
 
+
+
+//----------------------------------------------------------------------
 // CLASS: MainWindow
 // Holds everything in the application
+//----------------------------------------------------------------------
 MainWindow::MainWindow() {
 
   // ACTIONS
@@ -148,7 +151,6 @@ MainWindow::MainWindow() {
 
   setEnvironment();                            // load the settings file
 
-
   QWidget *window = new QWidget;      // create the window
   window->setLayout(mainLayout);      // set the content
   window->setMinimumSize(700, 550);   // define the dimensions
@@ -157,8 +159,8 @@ MainWindow::MainWindow() {
   addContactDialog = 0;
   settingsDialog = 0;
 
-  string currentConversation = "";    // The current conversations history file
-
+  hadPreviousConversation = false;        // Initialize this value as false at the startup 
+  
 
   setCentralWidget(window);           // own it
 }
@@ -167,14 +169,16 @@ MainWindow::MainWindow() {
 
 
 /*
- * ---------------------------|
- * METHODS                    |
- * ---------------------------|
+ * ---------------------------------------------------------------------|
+ * METHODS                                                              |
+ * ---------------------------------------------------------------------|
 */
 
 
+//----------------------------------------------------------------------
 // METHOD: sendMessage
 // Sends a text based message to the user on the receiving end
+//----------------------------------------------------------------------
 void MainWindow::sendMessage() {
 
   // If there is something to send, try to send it
@@ -191,16 +195,20 @@ void MainWindow::sendMessage() {
 // (END) sendMessage
 
 
+//----------------------------------------------------------------------
 // METHOD: inputIsEmpty
 // Checks if the input box doesn't contain any text
+//----------------------------------------------------------------------
 bool MainWindow::inputIsEmpty() {
   return (userInput->toPlainText() != "") ? true : false;
 }
 // (END) inputIsEmpty
 
 
+//----------------------------------------------------------------------
 // METHOD: setEnvironment
 // Loads the settings file
+//----------------------------------------------------------------------
 void MainWindow::setEnvironment() {
 
   // Load the settings
@@ -232,12 +240,17 @@ void MainWindow::setEnvironment() {
 
 
 
+
+//----------------------------------------------------------------------
 // ACTION SLOTS
 // ==========================================
+//----------------------------------------------------------------------
 
 
+//----------------------------------------------------------------------
 // METHOD: showAddContact
 // Shows the dialog to add a new contact to the user's "Contact" list
+//----------------------------------------------------------------------
 void MainWindow::showAddContact() {
 
   // Check if the dialog exists yet
@@ -257,9 +270,11 @@ void MainWindow::showAddContact() {
 // (END) showAddContact
 
 
+//----------------------------------------------------------------------
 // METHOD: addUserToContacts
 // If a user is found the the 'NewContactDialog', the user is added to the
 // contact list
+//----------------------------------------------------------------------
 void MainWindow::addUserToContacts(QString userAddress) {
 
   // Create an output file stream to write to the Contacts file
@@ -281,9 +296,11 @@ void MainWindow::addUserToContacts(QString userAddress) {
 // (END) addUserToContacts
 
 
+//----------------------------------------------------------------------
 // METHOD: removeSelectedContact
 // Finds the contact that the user selected from the 'Contact' list and then 
 // deletes it.
+//----------------------------------------------------------------------
 void MainWindow::removeSelectedContact() {
 
   // Find the selected item(s)
@@ -335,80 +352,93 @@ void MainWindow::removeSelectedContact() {
 // (END) removeSelectedContact
 
 
+//----------------------------------------------------------------------
 // METHOD: startConversation
 // Adds a new 'messageBox' to the stack
+//----------------------------------------------------------------------
 void MainWindow::startConversation(QListWidgetItem* item) {
 
-  string IPFileName;
+  // Open a file for write if there are things to be written
+  if(hadPreviousConversation) {
+    ofstream historyOutput;
+    historyOutput.open(currentConversation, ios::out);
 
-  // First, save current conversation if there is one to save
-  if(currentConversation.length() > 0) {
-    ofstream previousHistoryFile;
-    
-    IPFileName = "resources/hist/"+currentConversation;
-
-    previousHistoryFile.open((char*)IPFileName.c_str(), ios::out);
-    if(previousHistoryFile.is_open()) {
-      previousHistoryFile << stripQ(messageBox->toHtml()); 
-      previousHistoryFile.close();
+    if(historyOutput.is_open()) {
+      historyOutput << stripQ(messageBox->toHtml()); 
+      historyOutput.close();
     }
-  }
-  
-
-  // Switch to the selected conversation
-  char* IP = stripQ(item->text());
-  currentConversation = appendSuffix(IP, HIST_SUFFIX); 
-
-  IPFileName = "resources/hist/"+currentConversation;
-
-  ifstream historyFile;
-  historyFile.open((char*)IPFileName.c_str(), ios::in);
-
-  string tempData;
-  QString qtemp;
-  if(historyFile.is_open()) {
-    historyFile >> tempData;
-    while(!historyFile.eof()) {
-      qtemp.append((char*)tempData.c_str()); 
-      historyFile >> tempData;
-    }
-    historyFile.close();
-    messageBox->setText(qtemp);
   } else {
-    messageBox->setText("Just started a new conversation with "); 
-    messageBox->append((QString)IP);
+    hadPreviousConversation = true; 
   }
 
+  // Clear the message box of the previous conversation
+  messageBox->setText("");
+
+  // Assign the new filename
+  char* fileName = stripQ(item->text());
+  strcpy(currentConversation, createFilePath(HIST_PREFIX, fileName, HIST_SUFFIX));
+
+  // Open the conversation history
+  ifstream historyInput;
+  historyInput.open(currentConversation, ios::in);
+
+  char tempData[160];
+  QString inputString;
+  if(historyInput.is_open()) {
+    historyInput >> tempData;
+    while(!historyInput.eof()) {
+      inputString.append(tempData);
+      inputString.append(" ");
+      historyInput >> tempData;
+    }
+  
+    historyInput.close();
+  } else {
+    inputString = "<span style='color:#555;font-size:10px;'> A new conversation was started with " +
+                  item->text() +
+                  "</span><br>";
+  }
+
+  messageBox->setText(inputString);
+   
 }
 // (END) startConversation
 
 
+//----------------------------------------------------------------------
 // METHOD: deleteHistory
 // Erases the entire conversation history between another user
+//----------------------------------------------------------------------
 void MainWindow::deleteHistory() {
 
 }
 // (END) deleteHistory
 
 
+//----------------------------------------------------------------------
 // METHOD: closeConversation
 // Removes the 'messageBox' from the stack
+//----------------------------------------------------------------------
 void MainWindow::closeConversation() {
 
 }
 // (END) closeConversation
 
 
+//----------------------------------------------------------------------
 // METHOD: quitApp
 // Closes the application after writing everything that happened that session
+//----------------------------------------------------------------------
 void MainWindow::quitApp() {
 
 }
 // (END) quitApp
 
 
+//----------------------------------------------------------------------
 // METHOD: openSettings
 // Opens the settings dialog so the user can change their preferences
+//----------------------------------------------------------------------
 void MainWindow::openSettings() {
   if(!settingsDialog) {
     settingsDialog = new ChatSettings;

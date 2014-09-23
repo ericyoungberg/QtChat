@@ -8,4 +8,4 @@
 class QString;
 
 char* stripQ(QString); 
-char* appendSuffix(char*, const char*);
+char* createFilePath(const char*, char*, const char*);

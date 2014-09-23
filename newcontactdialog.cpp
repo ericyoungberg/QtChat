@@ -8,8 +8,11 @@
 #include <newcontactdialog.h>
 
 
+
+//----------------------------------------------------------------------
 // CLASS: NewContactDialog
 // A dialog for the user to add new contacts to their 'Contact' list
+//----------------------------------------------------------------------
 NewContactDialog::NewContactDialog(QWidget *parent) : QDialog(parent) {
 
   // LAYOUT
@@ -62,16 +65,21 @@ NewContactDialog::NewContactDialog(QWidget *parent) : QDialog(parent) {
  * ---------------------------|
 */
 
+
+//----------------------------------------------------------------------
 // METHOD: clearText
 // Wrapper for private input
+//----------------------------------------------------------------------
 void NewContactDialog::clearText() {
   addressInput->setText("");
 }
 // (END) clearText
 
 
+//----------------------------------------------------------------------
 // METHOD: findUser
 // Try to find an account online through the IP address entered by the user
+//----------------------------------------------------------------------
 void NewContactDialog::findUser() {
   emit foundUser(addressInput->text());
   close();
