@@ -11,6 +11,7 @@
 #include <chatinput.h>
 #include <chatsettings.h>
 #include <fstream>
+#include <iostream>
 #include "helpers.h"
 
 using namespace std;
@@ -160,7 +161,7 @@ MainWindow::MainWindow() {
   settingsDialog = 0;
 
   hadPreviousConversation = false;        // Initialize this value as false at the startup 
-  
+  currentConversation[0] = '\0';          // Initialize the curretConversation array
 
   setCentralWidget(window);           // own it
 }
@@ -358,12 +359,21 @@ void MainWindow::removeSelectedContact() {
 //----------------------------------------------------------------------
 void MainWindow::startConversation(QListWidgetItem* item) {
 
+  QTextCursor cursor = messageBox->textCursor();
+  cursor.movePosition(QTextCursor::Start);
+  messageBox->setTextCursor(cursor);
+
+  cout << endl;
+
   // Open a file for write if there are things to be written
   if(hadPreviousConversation) {
     ofstream historyOutput;
-    historyOutput.open(currentConversation, ios::out);
+    historyOutput.open(currentConversation, ios::out | ios::trunc);
+
+    cout << "Current Convo OUT: " << currentConversation << endl;
 
     if(historyOutput.is_open()) {
+      cout << "Message Box: " << stripQ(messageBox->toHtml()) << endl;
       historyOutput << stripQ(messageBox->toHtml()); 
       historyOutput.close();
     }
@@ -371,18 +381,19 @@ void MainWindow::startConversation(QListWidgetItem* item) {
     hadPreviousConversation = true; 
   }
 
-  // Clear the message box of the previous conversation
-  messageBox->setText("");
-
   // Assign the new filename
   char* fileName = stripQ(item->text());
   strcpy(currentConversation, createFilePath(HIST_PREFIX, fileName, HIST_SUFFIX));
+
+  cout << "Current Convo IN: " << currentConversation << endl;
+
+  messageBox->clear();
 
   // Open the conversation history
   ifstream historyInput;
   historyInput.open(currentConversation, ios::in);
 
-  char tempData[160];
+  char tempData[500];
   QString inputString;
   if(historyInput.is_open()) {
     historyInput >> tempData;
@@ -391,15 +402,16 @@ void MainWindow::startConversation(QListWidgetItem* item) {
       inputString.append(" ");
       historyInput >> tempData;
     }
-  
     historyInput.close();
+    messageBox->setHtml(inputString);
   } else {
     inputString = "<span style='color:#555;font-size:10px;'> A new conversation was started with " +
                   item->text() +
                   "</span><br>";
+    messageBox->setText(inputString);
   }
 
-  messageBox->setText(inputString);
+
    
 }
 // (END) startConversation
