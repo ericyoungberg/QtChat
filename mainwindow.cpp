@@ -10,6 +10,7 @@
 #include <newcontactdialog.h>
 #include <chatinput.h>
 #include <chatsettings.h>
+#include <conversationbox.h>
 #include <fstream>
 #include <iostream>
 #include "helpers.h"
@@ -113,8 +114,11 @@ MainWindow::MainWindow() {
 
   // Chat Window Section
   chatLayout = new QVBoxLayout;                           // init
-  messageBox = new QTextBrowser;
-  chatLayout->addWidget(messageBox, 1);                   // setup
+  conversations = new QStackedWidget;
+  char defaultTitle[16] = "Default";
+  defaultConversation = new ConversationBox(defaultTitle);
+  conversations->addWidget(defaultConversation);
+  chatLayout->addWidget(conversations, 1);                   // setup
   chatLayout->addLayout(inputLayout);
   
 
@@ -189,7 +193,7 @@ void MainWindow::sendMessage() {
     QString message = "<span style='color:red;'>"+userName+": </span>"+
                        userInput->toPlainText(); 
 
-    messageBox->append(message); // add the message the user sent to the conversation
+    //messageBox->append(message); // add the message the user sent to the conversation
     userInput->setText("");      // reset the input field for the user
   }
  }
@@ -359,60 +363,45 @@ void MainWindow::removeSelectedContact() {
 //----------------------------------------------------------------------
 void MainWindow::startConversation(QListWidgetItem* item) {
 
-  QTextCursor cursor = messageBox->textCursor();
-  cursor.movePosition(QTextCursor::Start);
-  messageBox->setTextCursor(cursor);
+  // Get the IP address of the selected item
+  char* IP = stripQ(item->text());
 
-  cout << endl;
+  cout << "IP: " << IP << endl;
 
-  // Open a file for write if there are things to be written
+  //If there was already a conversation selected, then make sure to save that file,
+  //If not, then change the flag.
   if(hadPreviousConversation) {
-    ofstream historyOutput;
-    historyOutput.open(currentConversation, ios::out | ios::trunc);
-
-    cout << "Current Convo OUT: " << currentConversation << endl;
-
-    if(historyOutput.is_open()) {
-      cout << "Message Box: " << stripQ(messageBox->toHtml()) << endl;
-      historyOutput << stripQ(messageBox->toHtml()); 
-      historyOutput.close();
-    }
+  
   } else {
     hadPreviousConversation = true; 
   }
 
-  // Assign the new filename
-  char* fileName = stripQ(item->text());
-  strcpy(currentConversation, createFilePath(HIST_PREFIX, fileName, HIST_SUFFIX));
-
-  cout << "Current Convo IN: " << currentConversation << endl;
-
-  messageBox->clear();
-
-  // Open the conversation history
-  ifstream historyInput;
-  historyInput.open(currentConversation, ios::in);
-
-  char tempData[500];
-  QString inputString;
-  if(historyInput.is_open()) {
-    historyInput >> tempData;
-    while(!historyInput.eof()) {
-      inputString.append(tempData);
-      inputString.append(" ");
-      historyInput >> tempData;
-    }
-    historyInput.close();
-    messageBox->setHtml(inputString);
-  } else {
-    inputString = "<span style='color:#555;font-size:10px;'> A new conversation was started with " +
-                  item->text() +
-                  "</span><br>";
-    messageBox->setText(inputString);
+  /*
+  //Setup a new conversation box if there is not one found/already setup
+  //If so, then exit
+  //If not found, then move forward to create a new conversation box
+  for(int i=0;i<conversations->count();i++) {
+    ConversationBox *conversation = conversations->widget(i)->findChild<ConversationBox*>();
+    if(strcmp(conversation->conversationID, IP) == 0) {
+      conversations->setCurrentWidget(conversations->widget(i));  
+      return;
+    } 
   }
+  */
 
 
-   
+  //Create a new conversation box
+  cout << "Size of IP: " << sizeof(IP) << endl;
+  ConversationBox *newConversation = new ConversationBox(IP);
+  QHBoxLayout *newConversationLayout = new QHBoxLayout;
+  newConversationLayout->addWidget(newConversation);
+  QWidget *newConversationWrap = new QWidget;
+  newConversationWrap->setLayout(newConversationLayout);
+  conversations->addWidget(newConversationWrap);
+  conversations->setCurrentWidget(conversations->widget(conversations->count()-1));
+  
+
+  
 }
 // (END) startConversation
 

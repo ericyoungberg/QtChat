@@ -22,6 +22,8 @@ class NewContactDialog;
 class ChatInput;
 class QAction;
 class ChatSettings;
+class ConversationBox;
+class QStackedWidget;
 
 
 using std::string;
@@ -62,14 +64,15 @@ private:
 
    QListWidget *contactList;
 
+   QStackedWidget *conversations;
+   ConversationBox *defaultConversation;
+
    ChatInput *userInput;
 
    ChatSettings *settingsDialog;
 
    QPushButton *sendMessageButton;
    QPushButton *addContactButton;
-
-   QTextBrowser *messageBox;
 
    QLabel *contactLabel;
 

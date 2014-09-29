@@ -6,10 +6,9 @@
 class ConversationBox : public QTextBrowser
 {
 public:
-  ConversationBox();
-  ConversationBox(char* ID);
+  ConversationBox(char ID[20]);
 
-  char* conversationID;
+  char conversationID[20];
 };
 
 #endif
