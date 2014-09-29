@@ -8,7 +8,6 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include <string>
 
 
 class QHBoxLayout;
@@ -23,7 +22,7 @@ class NewContactDialog;
 class ChatInput;
 class QAction;
 class ChatSettings;
-class QString;
+
 
 using std::string;
 

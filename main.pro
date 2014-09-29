@@ -8,6 +8,7 @@ HEADERS += \
   newcontactdialog.h \
   chatinput.h \
   chatsettings.h \
+  conversationbox.h \
   helpers.h
 
 SOURCES += \
@@ -16,4 +17,5 @@ SOURCES += \
   newcontactdialog.cpp \
   chatinput.cpp \
   chatsettings.cpp \
+  conversationbox.cpp \
   helpers.cpp
