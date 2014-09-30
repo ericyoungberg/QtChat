@@ -193,6 +193,7 @@ void MainWindow::sendMessage() {
     QString message = "<span style='color:red;'>"+userName+": </span>"+
                        userInput->toPlainText(); 
 
+    // Write the message to the ConversationBox
     conversations->currentWidget()->findChild<ConversationBox*>()->append(message);
     userInput->setText("");      // reset the input field for the user
   }
@@ -370,7 +371,11 @@ void MainWindow::startConversation(QListWidgetItem* item) {
   //If so, then exit
   //If not found, then move forward to create a new conversation box
   for(int i=0;i<conversations->count();i++) {
+
+    // If there is a ConversationBox found within this widget
     if(ConversationBox *conversation = conversations->widget(i)->findChild<ConversationBox*>()) {
+
+      // If this is the selected conversation, set it as current and then return
       if(conversation->conversationID == IP) {
         conversations->setCurrentWidget(conversations->widget(i));  
         return;
@@ -380,10 +385,16 @@ void MainWindow::startConversation(QListWidgetItem* item) {
 
   //Create a new conversation box
   ConversationBox *newConversation = new ConversationBox(IP);
+
+  // Add the ConversationBox to a layout
   QHBoxLayout *newConversationLayout = new QHBoxLayout;
   newConversationLayout->addWidget(newConversation);
+
+  // Embed that layout into the wrapper widget
   QWidget *newConversationWrap = new QWidget;
   newConversationWrap->setLayout(newConversationLayout);
+
+  // Add the whole thing to the StackedWidget
   conversations->addWidget(newConversationWrap);
   conversations->setCurrentWidget(conversations->widget(conversations->count()-1));
   
@@ -396,7 +407,21 @@ void MainWindow::startConversation(QListWidgetItem* item) {
 // Erases the entire conversation history between another user
 //----------------------------------------------------------------------
 void MainWindow::deleteHistory() {
+  
+  // Grab the current conversation
+  ConversationBox *conversation = conversations->currentWidget()->findChild<ConversationBox*>();
 
+  // Opens up the file to write to 
+  QFile file("resources/hist/" + conversation->conversationID + ".hist");
+
+  // If the file is open, then write the current conversation to it
+  if(file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    QTextStream output(&file);
+    output << "";   // Make sure nothing is written to the file
+  }
+
+  // Clear the current view of the conversation
+  conversation->setText("");
 }
 // (END) deleteHistory
 
@@ -407,6 +432,20 @@ void MainWindow::deleteHistory() {
 //----------------------------------------------------------------------
 void MainWindow::closeConversation() {
 
+  // Grab the current conversation
+  ConversationBox *conversation = conversations->currentWidget()->findChild<ConversationBox*>();
+
+  // Opens up the file to write to 
+  QFile file("resources/hist/" + conversation->conversationID + ".hist");
+
+  // If the file is open, then write the current conversation to it
+  if(file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+    QTextStream output(&file);
+    output << conversation->toHtml();   // Write as HTML since that's how everything is formatted
+  }
+
+  // Pop the current conversation from the conversations list
+  conversations->removeWidget(conversations->currentWidget());
 }
 // (END) closeConversation
 
@@ -416,6 +455,30 @@ void MainWindow::closeConversation() {
 // Closes the application after writing everything that happened that session
 //----------------------------------------------------------------------
 void MainWindow::quitApp() {
+  
+  // Make sure to write all open conversations to disk
+  for(int i=0;i<conversations->count();i++) {
+
+    // Make sure it found a conversation in that widget
+    if(ConversationBox *conversation = conversations->widget(i)->findChild<ConversationBox*>()) {
+
+      // We don't want to write the default window
+      if(conversation->conversationID != "Default") {
+
+        // Opens up the file to write to 
+        QFile file("resources/hist/" + conversation->conversationID + ".hist");
+
+        // If the file is open, then write the current conversation to it
+        if(file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
+          QTextStream output(&file);
+          output << conversation->toHtml();   // Write as HTML since that's how everything is formatted
+        }    
+      }
+    }
+  }
+
+  // Close the application
+  close();
 
 }
 // (END) quitApp
