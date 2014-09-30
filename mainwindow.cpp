@@ -193,7 +193,7 @@ void MainWindow::sendMessage() {
     QString message = "<span style='color:red;'>"+userName+": </span>"+
                        userInput->toPlainText(); 
 
-    //messageBox->append(message); // add the message the user sent to the conversation
+    conversations->currentWidget()->findChild<ConversationBox*>()->append(message);
     userInput->setText("");      // reset the input field for the user
   }
  }
@@ -364,34 +364,21 @@ void MainWindow::removeSelectedContact() {
 void MainWindow::startConversation(QListWidgetItem* item) {
 
   // Get the IP address of the selected item
-  char* IP = stripQ(item->text());
+  QString IP = item->text();
 
-  cout << "IP: " << IP << endl;
-
-  //If there was already a conversation selected, then make sure to save that file,
-  //If not, then change the flag.
-  if(hadPreviousConversation) {
-  
-  } else {
-    hadPreviousConversation = true; 
-  }
-
-  /*
   //Setup a new conversation box if there is not one found/already setup
   //If so, then exit
   //If not found, then move forward to create a new conversation box
   for(int i=0;i<conversations->count();i++) {
-    ConversationBox *conversation = conversations->widget(i)->findChild<ConversationBox*>();
-    if(strcmp(conversation->conversationID, IP) == 0) {
-      conversations->setCurrentWidget(conversations->widget(i));  
-      return;
-    } 
+    if(ConversationBox *conversation = conversations->widget(i)->findChild<ConversationBox*>()) {
+      if(conversation->conversationID == IP) {
+        conversations->setCurrentWidget(conversations->widget(i));  
+        return;
+      } 
+    }
   }
-  */
-
 
   //Create a new conversation box
-  cout << "Size of IP: " << sizeof(IP) << endl;
   ConversationBox *newConversation = new ConversationBox(IP);
   QHBoxLayout *newConversationLayout = new QHBoxLayout;
   newConversationLayout->addWidget(newConversation);
@@ -399,8 +386,6 @@ void MainWindow::startConversation(QListWidgetItem* item) {
   newConversationWrap->setLayout(newConversationLayout);
   conversations->addWidget(newConversationWrap);
   conversations->setCurrentWidget(conversations->widget(conversations->count()-1));
-  
-
   
 }
 // (END) startConversation

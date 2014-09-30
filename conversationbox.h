@@ -6,9 +6,9 @@
 class ConversationBox : public QTextBrowser
 {
 public:
-  ConversationBox(char ID[20]);
+  ConversationBox(QString);
 
-  char conversationID[20];
+  QString conversationID;
 };
 
 #endif
