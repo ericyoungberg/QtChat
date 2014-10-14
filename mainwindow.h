@@ -8,6 +8,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "SocketHandler.h"
 
 
 class QHBoxLayout;
@@ -24,9 +25,7 @@ class QAction;
 class ChatSettings;
 class ConversationBox;
 class QStackedWidget;
-
-
-using std::string;
+class SocketHandler;
 
 
 class MainWindow : public QMainWindow 
@@ -48,6 +47,9 @@ private slots:
   void setEnvironment();
 private:
   bool inputIsEmpty();
+
+   SocketHandler network;
+   int networkStatus;
 
    QString userName;
    QString realName;

@@ -13,6 +13,7 @@
 #include <conversationbox.h>
 #include <fstream>
 #include <iostream>
+#include "SocketHandler.h"
 #include "helpers.h"
 
 using namespace std;
@@ -154,7 +155,12 @@ MainWindow::MainWindow() {
   // SETUP
   // =======================================
 
-  setEnvironment();                            // load the settings file
+  setEnvironment();                   // load the settings file
+
+  network = new SocketHandler();      // This handles all network activities
+  if((networkStatus = network.createListener()) != 0) {
+    messageBox->setText("<span style='color: red;font-weight: bold;'>Could not connect to the network</span>") 
+  }
 
   QWidget *window = new QWidget;      // create the window
   window->setLayout(mainLayout);      // set the content
