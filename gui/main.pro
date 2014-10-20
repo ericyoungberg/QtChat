@@ -9,7 +9,6 @@ HEADERS += \
   chatinput.h \
   chatsettings.h \
   conversationbox.h \
-  SocketHandler.h \
   helpers.h
 
 SOURCES += \
@@ -19,5 +18,4 @@ SOURCES += \
   chatinput.cpp \
   chatsettings.cpp \
   conversationbox.cpp \
-  SocketHandler.cpp \
   helpers.cpp

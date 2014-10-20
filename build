@@ -1,0 +1,23 @@
+#!/bin/bash
+
+echo
+echo 'Building QtChat...'
+echo
+
+echo '---------- Building QtServer'
+make -C ./net
+
+echo
+echo '---------- Building GUI'
+make -C ./gui
+
+if [ -e 'QtChat' ]
+then
+  rm QtChat
+fi
+
+cp ./gui/QtChat ./QtChat
+
+echo 
+echo 'Done!'
+echo

@@ -13,7 +13,6 @@
 #include <conversationbox.h>
 #include <fstream>
 #include <iostream>
-#include "SocketHandler.h"
 #include "helpers.h"
 
 using namespace std;
@@ -157,11 +156,6 @@ MainWindow::MainWindow() {
 
   setEnvironment();                   // load the settings file
 
-  network = new SocketHandler();      // This handles all network activities
-  if((networkStatus = network.createListener()) != 0) {
-    messageBox->setText("<span style='color: red;font-weight: bold;'>Could not connect to the network</span>") 
-  }
-
   QWidget *window = new QWidget;      // create the window
   window->setLayout(mainLayout);      // set the content
   window->setMinimumSize(700, 550);   // define the dimensions
@@ -170,8 +164,8 @@ MainWindow::MainWindow() {
   addContactDialog = 0;
   settingsDialog = 0;
 
-  hadPreviousConversation = false;        // Initialize this value as false at the startup 
-  currentConversation[0] = '\0';          // Initialize the curretConversation array
+  hadPreviousConversation = false;    // Initialize this value as false at the startup 
+  currentConversation[0] = '\0';      // Initialize the curretConversation array
 
   setCentralWidget(window);           // own it
 }
