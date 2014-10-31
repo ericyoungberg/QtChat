@@ -5,7 +5,7 @@
 
 #include <QTextEdit>
 #include <QKeyEvent>
-#include <chatinput.h>
+#include "chatinput.h"
 
 
 //----------------------------------------------------------------------

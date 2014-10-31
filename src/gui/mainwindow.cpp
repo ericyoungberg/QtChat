@@ -6,14 +6,22 @@
 
 #include <QtGui>
 #include <QtWidgets>
-#include <mainwindow.h>
-#include <newcontactdialog.h>
-#include <chatinput.h>
-#include <chatsettings.h>
-#include <conversationbox.h>
 #include <fstream>
 #include <iostream>
 #include "helpers.h"
+#include "mainwindow.h"
+#include "conversationbox.h"
+#include "chatsettings.h"
+#include "newcontactdialog.h"
+#include "chatinput.h"
+#include <unistd.h>
+#include <netdb.h>
+#include <string.h>
+#include <sys/types.h>
+#include <sys/socket.h>
+#include <cstdlib>
+
+
 
 using namespace std;
 
@@ -154,6 +162,8 @@ MainWindow::MainWindow() {
   // SETUP
   // =======================================
 
+  network = new NetworkHandler;       // Initialize the network handler for sending messages
+
   setEnvironment();                   // load the settings file
 
   QWidget *window = new QWidget;      // create the window
@@ -189,13 +199,24 @@ void MainWindow::sendMessage() {
   // If there is something to send, try to send it
   if(inputIsEmpty()) {
 
+    char* input = stripQ(userInput->toPlainText());
+
     // Format the message to be presented
-    QString message = "<span style='color:red;'>"+userName+": </span>"+
-                       userInput->toPlainText(); 
+    QString message = "<span style='color:red;'>"+userName+": </span>"+userInput->toPlainText();
 
     // Write the message to the ConversationBox
-    conversations->currentWidget()->findChild<ConversationBox*>()->append(message);
+    ConversationBox* currentConversation = conversations->currentWidget()->findChild<ConversationBox*>();
+    currentConversation->append(message);
     userInput->setText("");      // reset the input field for the user
+
+    int nbytes;
+    for(int i=0;i<(int)network->connections.size();i++) {
+      if(network->connections.at(i).IP == stripQ(currentConversation->conversationID))
+        nbytes = send(network->connections.at(i).sockfd, input, strlen(input), 0); 
+    }
+
+    cout << input << endl;
+    cout << "Bytes sent: " << nbytes << endl;
   }
  }
 // (END) sendMessage
@@ -397,6 +418,8 @@ void MainWindow::startConversation(QListWidgetItem* item) {
   // Add the whole thing to the StackedWidget
   conversations->addWidget(newConversationWrap);
   conversations->setCurrentWidget(conversations->widget(conversations->count()-1));
+
+  //network->createConnection(stripQ(IP));
   
 }
 // (END) startConversation

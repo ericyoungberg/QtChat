@@ -5,7 +5,7 @@
 
 #include <QtGui>
 #include <QtWidgets>
-#include <newcontactdialog.h>
+#include "newcontactdialog.h"
 
 
 

@@ -5,7 +5,7 @@
 
 #include <QtGui>
 #include <QtWidgets>
-#include <chatsettings.h>
+#include "chatsettings.h"
 
 
 //----------------------------------------------------------------------

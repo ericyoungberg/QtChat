@@ -1,23 +1,53 @@
 #!/bin/bash
 
 echo
-echo 'Building QtChat...'
+echo 'Installing QtChat...'
+
+# Build the application
+echo
+echo '-------------- Building QtChat'
 echo
 
-echo '---------- Building QtServer'
-make -C ./net
+make -C ./src
 
-echo
-echo '---------- Building GUI'
-make -C ./gui
-
-if [ -e 'QtChat' ]
-then
-  rm QtChat
+if [ $? != 0 ]; then
+  echo
+  echo '===================== Failed building application!'
+  echo
+  echo 'Exiting...'
+  echo
+  exit 1
 fi
 
-cp ./gui/QtChat ./QtChat
+# Clean up after build
+if [ "$1" == "-c" ]; then
+  echo
+  echo '-------------- Cleaning'
+  echo
 
-echo 
-echo 'Done!'
+  rm src/*.o
+fi
+
+if [ -e './QtChat' ]; then
+  rm ./QtChat
+fi
+
+# Retrieve the executable from the compiling directory
+mv ./src/QtChat ./QtChat
+
+if [ $? != 0 ]; then
+  echo
+  echo '===================== Failed fetching application!'
+  echo
+  echo 'Exiting...'
+  echo
+  exit 1
+fi
+
+
+# If all went well, exit cleanly
 echo
+echo "Done!"
+echo
+
+exit 0

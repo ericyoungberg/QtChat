@@ -8,6 +8,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "NetworkHandler.h"
 
 
 class QHBoxLayout;
@@ -45,6 +46,12 @@ private slots:
   void setEnvironment();
 private:
   bool inputIsEmpty();
+
+  int servProc;
+  int pipeIn;
+  int pipeOut;
+
+  NetworkHandler *network;
 
    QString userName;
    QString realName;
