@@ -8,7 +8,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
-#include "NetworkHandler.h"
+#include "../net/NetworkHandler.h"
 
 
 class QHBoxLayout;

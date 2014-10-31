@@ -1,15 +1,32 @@
 #ifndef NETWORKHANDLER_H
 #define NETWORKHANDLER_H
 
+#include <vector>
+
+using std::vector;
+
+struct connection {
+  int sockfd;
+  char IP[24];
+
+  connection(){};
+  connection(char* setIP) {
+    strcpy(IP, setIP); 
+  }
+};
+
 class NetworkHandler
 {
 
 public:
-  NetworkHandler(int, int);
+  NetworkHandler();
+
+  void transmit(char*, char*);
+  void createOutwardConnection(char*);
+  void createListener();
 
 private:
-  int _in;
-  int _out;
+  vector<connection> connections;
 
 };
 

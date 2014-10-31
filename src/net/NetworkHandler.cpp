@@ -11,12 +11,59 @@ using namespace std;
 
 const char* PORT = "2255";
 
-NetworkHandler::NetworkHandler() {
+NetworkHandler::NetworkHandler() {}
+
+void NetworkHandler::transmit(char* IP, char* message) {
+  int nbytes;
+
+  cout << IP << ", " << message << endl;
+
+  for(unsigned i=0;i<connections.size();i++) {
+    if(strcmp(connections.at(i).IP, IP) == 0) {
+      cout << "Connection found on: " << IP << endl;
+      nbytes = send(connections.at(i).sockfd, message, strlen(message), 0);
+      cout << "BYTES SENT: " << nbytes << endl; 
+    }
+  }
+}
+
+void NetworkHandler::createOutwardConnection(char* IP) {
+
+  // Create connection structure and copy the IP into it before getaddrinfo screws it all up
+  struct connection newConnection(IP);
+
+  // Make a connection to send the message to the recipient
+  struct addrinfo hints;
+  struct addrinfo *servinfo;
+
+  int sockfd;   // The socket created to be stored in the connection struct
+
+  // Setup the hints
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+
+  // Make the info
+  getaddrinfo(IP, NULL, &hints, &servinfo);
+
+  // Retrieve a socket for the connection
+  sockfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
+  if(sockfd == -1) cout << "Something went wrong with the socket\n";
+
+  // Connect the socket
+  connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
+
+  // Save the socket now that it has been setup
+  newConnection.sockfd = sockfd;
+
+  // Add the new connection to the list of connections for later use
+  connections.push_back(newConnection);
 
 }
 
 void NetworkHandler::createListener() {
 
+  /*
   fd_set master,
          read_fds;
   int fdmax;
@@ -61,7 +108,7 @@ void NetworkHandler::createListener() {
   }
 
   if(bind(listener, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-    cout << "Could not bind the socket\n\n\";
+    cout << "Could not bind the socket\n\n";
     exit(1);
   }
 
@@ -112,5 +159,5 @@ void NetworkHandler::createListener() {
     }
 
   }
-
+*/
 }
