@@ -9,25 +9,47 @@
 
 using namespace std;
 
+// Universal application port
 const char* PORT = "2255";
 
+// Blank constructor
 NetworkHandler::NetworkHandler() {}
 
+
+//----------------------------------------------------------------------
+// METHOD: transmit
+// Finds an existing socket and sends a message across it
+//----------------------------------------------------------------------
 void NetworkHandler::transmit(char* IP, char* message) {
+
+  // Number of bytes sent
   int nbytes;
 
+  // Find a connection that matches the IP destination passed to the method
   for(unsigned i=0;i<connections.size();i++) {
     if(strcmp(connections.at(i).IP, IP) == 0) {
+
+      // Found a connection!
       cout << "Connection found on: " << IP << endl;
+
+      // Try to send the message over the socket
       if((nbytes = send(connections.at(i).sockfd, message, strlen(message), 0)) == -1) {
         cout << "Could not send the message to " << IP << endl;
-        return;
+        return; // Leave if we couldn't send anything
       }
+
+      // Report bytes sent
       cout << "BYTES SENT: " << nbytes << endl; 
     }
   }
 }
 
+
+//----------------------------------------------------------------------
+// METHOD: createOutwardConnection
+// Creates a new socket to send messages over and store it in the
+// connections vector.
+//----------------------------------------------------------------------
 int NetworkHandler::createOutwardConnection(char* IP) {
 
   // Create connection structure and copy the IP into it before getaddrinfo screws it all up
