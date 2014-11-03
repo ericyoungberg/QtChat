@@ -8,6 +8,7 @@
 #include <QtWidgets>
 #include <fstream>
 #include <iostream>
+#include <sys/stat.h>
 #include "helpers.h"
 #include "mainwindow.h"
 #include "conversationbox.h"
@@ -201,7 +202,9 @@ void MainWindow::sendMessage() {
     currentConversation->append(message);
     
     // Send the message to the user
-    network->transmit(stripQ(currentConversation->conversationID), stripQ(userInput->toPlainText()));
+    char* input = stripQ(userInput->toPlainText());
+    char* addr = stripQ(currentConversation->conversationID);
+    network->transmit(addr, input);
 
     userInput->setText("");      // reset the input field for the user
   }
@@ -224,6 +227,9 @@ bool MainWindow::inputIsEmpty() {
 // Loads the settings file
 //----------------------------------------------------------------------
 void MainWindow::setEnvironment() {
+
+  // Make the resources directory if one does not exist
+  mkdir("resources", 0700);
 
   // Load the settings
   QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
@@ -299,9 +305,9 @@ void MainWindow::addUserToContacts(QString userAddress) {
   if(contactsFile.is_open()) {
     char* userAddressRaw = stripQ(userAddress);
     contactsFile << userAddressRaw << endl;    // Write to the file
-    contactsFile.close();           // Close the file
+    contactsFile.close();                      // Close the file
   } else {
-    // WILL HANDLE ERROR 
+    cout << "Cannot open the contacts file...\n";
   }
 
   // Append the user to GUI contact list
@@ -406,7 +412,12 @@ void MainWindow::startConversation(QListWidgetItem* item) {
   conversations->addWidget(newConversationWrap);
   conversations->setCurrentWidget(conversations->widget(conversations->count()-1));
 
-  network->createOutwardConnection(stripQ(IP));
+  // Strip Qt qualities and create a new outward socket
+  char* rawIP = stripQ(IP);
+  if(network->createOutwardConnection(rawIP) == -1) {
+    // If the connection failed, display it in the new conversation box
+    conversations->currentWidget()->findChild<ConversationBox*>()->setText("<span style='color:red;font-size:10px;'>Could not connect to "+IP+"</span>");
+  }
   
 }
 // (END) startConversation

@@ -7,6 +7,7 @@
 #include <QtWidgets>
 #include "chatsettings.h"
 
+#define SETTINGS_FILE "resources/settings.ini"
 
 //----------------------------------------------------------------------
 // CLASS: ChatSettings

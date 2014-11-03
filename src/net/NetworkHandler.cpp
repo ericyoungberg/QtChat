@@ -16,18 +16,19 @@ NetworkHandler::NetworkHandler() {}
 void NetworkHandler::transmit(char* IP, char* message) {
   int nbytes;
 
-  cout << IP << ", " << message << endl;
-
   for(unsigned i=0;i<connections.size();i++) {
     if(strcmp(connections.at(i).IP, IP) == 0) {
       cout << "Connection found on: " << IP << endl;
-      nbytes = send(connections.at(i).sockfd, message, strlen(message), 0);
+      if((nbytes = send(connections.at(i).sockfd, message, strlen(message), 0)) == -1) {
+        cout << "Could not send the message to " << IP << endl;
+        return;
+      }
       cout << "BYTES SENT: " << nbytes << endl; 
     }
   }
 }
 
-void NetworkHandler::createOutwardConnection(char* IP) {
+int NetworkHandler::createOutwardConnection(char* IP) {
 
   // Create connection structure and copy the IP into it before getaddrinfo screws it all up
   struct connection newConnection(IP);
@@ -40,18 +41,21 @@ void NetworkHandler::createOutwardConnection(char* IP) {
 
   // Setup the hints
   memset(&hints, 0, sizeof(hints));
-  hints.ai_family = AF_INET;
+  hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
 
   // Make the info
-  getaddrinfo(IP, NULL, &hints, &servinfo);
+  getaddrinfo(IP, "2238", &hints, &servinfo);
 
   // Retrieve a socket for the connection
   sockfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
   if(sockfd == -1) cout << "Something went wrong with the socket\n";
 
   // Connect the socket
-  connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen);
+  if(connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+    cout << "Not able to connect to " << IP << endl; 
+    return -1;
+  }
 
   // Save the socket now that it has been setup
   newConnection.sockfd = sockfd;
@@ -59,6 +63,8 @@ void NetworkHandler::createOutwardConnection(char* IP) {
   // Add the new connection to the list of connections for later use
   connections.push_back(newConnection);
 
+  // Everything is good
+  return 0;
 }
 
 void NetworkHandler::createListener() {

@@ -22,7 +22,7 @@ public:
   NetworkHandler();
 
   void transmit(char*, char*);
-  void createOutwardConnection(char*);
+  int createOutwardConnection(char*);
   void createListener();
 
 private:
