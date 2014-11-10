@@ -47,7 +47,7 @@ void NetworkHandler::transmit(char* IP, char* message) {
 
 //----------------------------------------------------------------------
 // METHOD: createOutwardConnection
-// Creates a new socket to send messages over and store it in the
+// Creates a new socket to send messages over and stores it in the
 // connections vector.
 //----------------------------------------------------------------------
 int NetworkHandler::createOutwardConnection(char* IP) {
@@ -76,7 +76,7 @@ int NetworkHandler::createOutwardConnection(char* IP) {
   // Connect the socket
   if(connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
     cout << "Not able to connect to " << IP << endl; 
-    return -1;
+    //return -1;
   }
 
   // Save the socket now that it has been setup
