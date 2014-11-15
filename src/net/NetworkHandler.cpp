@@ -4,6 +4,7 @@
 #include <string.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <netinet/in.h>
 #include <cstdlib>
 #include "NetworkHandler.h"
 
@@ -25,12 +26,11 @@ void NetworkHandler::transmit(char* IP, char* message) {
   // Number of bytes sent
   int nbytes;
 
+  cout << message << endl;
+
   // Find a connection that matches the IP destination passed to the method
   for(unsigned i=0;i<connections.size();i++) {
     if(strcmp(connections.at(i).IP, IP) == 0) {
-
-      // Found a connection!
-      cout << "Connection found on: " << IP << endl;
 
       // Try to send the message over the socket
       if((nbytes = send(connections.at(i).sockfd, message, strlen(message), 0)) == -1) {
@@ -40,6 +40,7 @@ void NetworkHandler::transmit(char* IP, char* message) {
 
       // Report bytes sent
       cout << "BYTES SENT: " << nbytes << endl; 
+      cout << message << endl;
     }
   }
 }
@@ -67,7 +68,8 @@ int NetworkHandler::createOutwardConnection(char* IP) {
   hints.ai_socktype = SOCK_STREAM;
 
   // Make the info
-  getaddrinfo(IP, "2238", &hints, &servinfo);
+  int error = getaddrinfo(IP, "2238", &hints, &servinfo);
+  if(error) cout << "Could not get the addrinfo\n";
 
   // Retrieve a socket for the connection
   sockfd = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);

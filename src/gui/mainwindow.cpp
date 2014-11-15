@@ -204,6 +204,7 @@ void MainWindow::sendMessage() {
     // Send the message to the user
     char* input = stripQ(userInput->toPlainText());
     char* addr = stripQ(currentConversation->conversationID);
+
     network->transmit(addr, input);
 
     userInput->setText("");      // reset the input field for the user
