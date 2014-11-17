@@ -9,6 +9,7 @@
 
 #include <QMainWindow>
 #include "../net/NetworkHandler.h"
+#include "../net/ApplicationBus.h"
 
 
 class QHBoxLayout;
@@ -32,7 +33,9 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-    MainWindow();
+    MainWindow(ApplicationBus*);
+signals:
+  void receivedMessage(char*, char*);
 private slots:
   void showAddContact();
   void sendMessage();
@@ -44,6 +47,7 @@ private slots:
   void quitApp();
   void openSettings();
   void setEnvironment();
+  void triggerNewMessage(char*, char*);
 private:
   bool inputIsEmpty();
 
@@ -51,6 +55,7 @@ private:
   int pipeIn;
   int pipeOut;
 
+  ApplicationBus *ipc;
   NetworkHandler *network;
 
    QString userName;

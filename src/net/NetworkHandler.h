@@ -2,6 +2,7 @@
 #define NETWORKHANDLER_H
 
 #include <vector>
+#include "ApplicationBus.h"
 
 using std::vector;
 
@@ -20,6 +21,7 @@ class NetworkHandler
 
 public:
   NetworkHandler();
+  NetworkHandler(ApplicationBus*);
 
   void transmit(char*, char*);
   int createOutwardConnection(char*);
@@ -27,6 +29,8 @@ public:
 
 private:
   vector<connection> connections;
+
+  ApplicationBus *ipc;
 
 };
 

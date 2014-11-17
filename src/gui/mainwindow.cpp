@@ -16,6 +16,7 @@
 #include "newcontactdialog.h"
 #include "chatinput.h"
 #include "../net/NetworkHandler.h"
+#include "../net/ApplicationBus.h"
 
 
 using namespace std;
@@ -36,7 +37,10 @@ using namespace std;
 // CLASS: MainWindow
 // Holds everything in the application GUI
 //----------------------------------------------------------------------
-MainWindow::MainWindow() {
+MainWindow::MainWindow(ApplicationBus *bus) {
+
+  // Connect the Inter-Process comms bus first
+  ipc = bus;
 
   // ACTIONS
   // ================================
@@ -152,6 +156,7 @@ MainWindow::MainWindow() {
   connect(addContactButton, SIGNAL(clicked()), this, SLOT(showAddContact()));
   connect(userInput, SIGNAL(enterKeyPressed()), this, SLOT(sendMessage()));
   connect(contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(startConversation(QListWidgetItem*)));
+  connect(this, SIGNAL(receivedMessage(char*, char*)), this, SLOT(triggerNewMessage(char*, char*)));
 
   
   // SETUP
@@ -205,6 +210,7 @@ void MainWindow::sendMessage() {
     char* input = stripQ(userInput->toPlainText());
     char* addr = stripQ(currentConversation->conversationID);
 
+    // Transmit the message across the internet of things
     network->transmit(addr, input);
 
     userInput->setText("");      // reset the input field for the user
@@ -260,6 +266,14 @@ void MainWindow::setEnvironment() {
 // (END) setEnvironment
 
 
+//----------------------------------------------------------------------
+// METHOD: setEnvironment
+// Loads the settings file
+//----------------------------------------------------------------------
+void MainWindow::triggerNewMessage(char*, char*) {
+  cout << "GOT A NEW MESSAGE BITCH NUGGET!!!!\n";
+}
+// (END) triggerNewMessage
 
 
 //----------------------------------------------------------------------

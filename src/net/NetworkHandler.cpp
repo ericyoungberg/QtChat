@@ -5,8 +5,10 @@
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
+#include <arpa/inet.h>
 #include <cstdlib>
 #include "NetworkHandler.h"
+#include "ApplicationBus.h"
 
 using namespace std;
 
@@ -15,6 +17,11 @@ const char* PORT = "2255";
 
 // Blank constructor
 NetworkHandler::NetworkHandler() {}
+
+// Overloaded constructor to accept D-Bus
+NetworkHandler::NetworkHandler(ApplicationBus *bus) {
+  ipc = bus; 
+}
 
 
 //----------------------------------------------------------------------
@@ -44,6 +51,7 @@ void NetworkHandler::transmit(char* IP, char* message) {
     }
   }
 }
+// (END) transmit
 
 
 //----------------------------------------------------------------------
@@ -90,19 +98,29 @@ int NetworkHandler::createOutwardConnection(char* IP) {
   // Everything is good
   return 0;
 }
+// (END) makeOutwardConnection
 
+
+//----------------------------------------------------------------------
+// METHOD: createListener
+// Creates a listener that accepts incoming connections and their 
+// respsective transmissions
+//----------------------------------------------------------------------
 void NetworkHandler::createListener() {
 
-  /*
+  cout << "Created the listener!\n";
+
   fd_set master,
          read_fds;
   int fdmax;
 
-  char buf[256];
+  char IP[24];
+
+  char buf[1024];
   int nbytes;
 
   int yes = 1;
-  int f, j;
+  int i;
   int listener,
       newfd,
       status;
@@ -110,7 +128,7 @@ void NetworkHandler::createListener() {
   struct addrinfo hints;
   struct addrinfo *servinfo;
 
-  socklen_t addr_size;
+  socklen_t addrlen;
 
   struct sockaddr_storage remote_addr;
 
@@ -170,24 +188,36 @@ void NetworkHandler::createListener() {
           } else {
             FD_SET(newfd, &master);
             if(newfd > fdmax) fdmax = newfd;
-
           }
         } else {
-          if((nbytes = recv(i, &buf, sizeof(buf), 0)) <= 0) {
+          if((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
             if(nbytes == 0) {
               cout << "Connection closed on " << i << endl; 
             }
             close(i);
             FD_CLR(i, &master);
           } else {
-            for(j=0;j<=fdmax;j++) {
-              
-            }  
+
+            // Capture just the message that was most recently received
+            char message[nbytes];
+            strncpy(message, buf, nbytes);
+
+            // Get the sender's IP
+            status = getpeername(i, (struct sockaddr*)&remote_addr, &addrlen);
+            if(status == -1) cout << "Could not retrieve peername\n";
+
+            struct sockaddr_in *s = (struct sockaddr_in*)&remote_addr;
+            inet_ntop(AF_INET, &s->sin_addr, IP, sizeof(IP));
+
+            cout << "IP: " << IP << endl;
+
+            // Update the GUI
+            ipc->newMessage(IP, message);
           } 
         }
       } 
     }
 
   }
-*/
 }
+// (END) createListener
