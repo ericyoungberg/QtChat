@@ -8,11 +8,11 @@
 
 #include <QtGui>
 #include <QApplication>
+#include <QtDBus>
 #include <iostream>
 #include <unistd.h>
 #include "gui/mainwindow.h"
 #include "net/NetworkHandler.h"
-#include "net/ApplicationBus.h"
 
 using std::cout;
 
@@ -23,18 +23,22 @@ int main(int argc, char *argv[]) {
   // Define the application
   QApplication *app = new QApplication(argc, argv);
 
-  ApplicationBus *bus = new ApplicationBus(app);
+  // Create the DBus session
+  if(!QDBusConnection::sessionBus().isConnected()) {
+    cout << "CANNOT CONNECT\n";
+    return 1;
+  }
 
   // Fork into a seperate process
   // The first for the network listener
   // The second for the GUI
   if(!fork()) {
     // Create a listener to accept incoming connections for the GUI
-    NetworkHandler *network = new NetworkHandler(bus);
+    NetworkHandler *network = new NetworkHandler();
     network->createListener();
   } else {
     // Define and launch the application window
-    MainWindow *window = new MainWindow(bus);
+    MainWindow *window = new MainWindow();
     window->show();
   }
 

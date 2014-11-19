@@ -16,8 +16,8 @@
 #include "newcontactdialog.h"
 #include "chatinput.h"
 #include "../net/NetworkHandler.h"
-#include "../net/ApplicationBus.h"
-
+#include "../net/ChatAdaptor.h"
+#include "../net/ChatInterface.h"
 
 using namespace std;
 
@@ -37,10 +37,7 @@ using namespace std;
 // CLASS: MainWindow
 // Holds everything in the application GUI
 //----------------------------------------------------------------------
-MainWindow::MainWindow(ApplicationBus *bus) {
-
-  // Connect the Inter-Process comms bus first
-  ipc = bus;
+MainWindow::MainWindow() {
 
   // ACTIONS
   // ================================
@@ -164,6 +161,13 @@ MainWindow::MainWindow(ApplicationBus *bus) {
 
   network = new NetworkHandler;
 
+  new ChatAdaptor(this);
+  QDBusConnection::sessionBus().registerObject("/", this);
+
+  ipc = new ChatInterface(QString(), QString(), QDBusConnection::sessionBus(), this);
+  
+  connect(ipc, SIGNAL(queueRouter(QString, QString)), this, SLOT(route(QString, QString)));
+
   setEnvironment();                   // load the settings file
 
   QWidget *window = new QWidget;      // create the window
@@ -220,6 +224,20 @@ void MainWindow::sendMessage() {
 
 
 //----------------------------------------------------------------------
+// METHOD: receivedMessage
+// Handles incoming messages
+//----------------------------------------------------------------------
+void MainWindow::receivedMessage(QString IP, QString message) {
+  QWidget *conversation = grabConversation(IP);
+
+  conversations->setCurrentWidget(conversation);
+
+  conversations->currentWidget()->findChild<ConversationBox*>()->append("<span style='color:blue;'>"+IP+"</span>"+message);
+}
+// (END) receivedMessage
+
+
+//----------------------------------------------------------------------
 // METHOD: inputIsEmpty
 // Checks if the input box doesn't contain any text
 //----------------------------------------------------------------------
@@ -270,10 +288,39 @@ void MainWindow::setEnvironment() {
 // METHOD: setEnvironment
 // Loads the settings file
 //----------------------------------------------------------------------
-void MainWindow::triggerNewMessage(char*, char*) {
-  cout << "GOT A NEW MESSAGE BITCH NUGGET!!!!\n";
+QWidget* MainWindow::grabConversation(QString IP) {
+  //Setup a new conversation box if there is not one found/already setup
+  //If so, then exit
+  //If not found, then move forward to create a new conversation box
+  for(int i=0;i<conversations->count();i++) {
+
+    // If there is a ConversationBox found within this widget
+    if(ConversationBox *conversation = conversations->widget(i)->findChild<ConversationBox*>()) {
+
+      // If this is the selected conversation, set it as current and then return
+      if(conversation->conversationID == IP) {
+        return conversations->widget(i);  
+      } 
+    }
+  }
+
+  //Create a new conversation box
+  ConversationBox *newConversation = new ConversationBox(IP);
+
+  // Add the ConversationBox to a layout
+  QHBoxLayout *newConversationLayout = new QHBoxLayout;
+  newConversationLayout->addWidget(newConversation);
+
+  // Embed that layout into the wrapper widget
+  QWidget *newConversationWrap = new QWidget;
+  newConversationWrap->setLayout(newConversationLayout);
+
+  // Add the whole thing to the StackedWidget
+  conversations->addWidget(newConversationWrap);
+
+  return conversations->widget(conversations->count()-1);
+
 }
-// (END) triggerNewMessage
 
 
 //----------------------------------------------------------------------
@@ -396,36 +443,11 @@ void MainWindow::startConversation(QListWidgetItem* item) {
   // Get the IP address of the selected item
   QString IP = item->text();
 
-  //Setup a new conversation box if there is not one found/already setup
-  //If so, then exit
-  //If not found, then move forward to create a new conversation box
-  for(int i=0;i<conversations->count();i++) {
-
-    // If there is a ConversationBox found within this widget
-    if(ConversationBox *conversation = conversations->widget(i)->findChild<ConversationBox*>()) {
-
-      // If this is the selected conversation, set it as current and then return
-      if(conversation->conversationID == IP) {
-        conversations->setCurrentWidget(conversations->widget(i));  
-        return;
-      } 
-    }
-  }
-
-  //Create a new conversation box
-  ConversationBox *newConversation = new ConversationBox(IP);
-
-  // Add the ConversationBox to a layout
-  QHBoxLayout *newConversationLayout = new QHBoxLayout;
-  newConversationLayout->addWidget(newConversation);
-
-  // Embed that layout into the wrapper widget
-  QWidget *newConversationWrap = new QWidget;
-  newConversationWrap->setLayout(newConversationLayout);
-
-  // Add the whole thing to the StackedWidget
-  conversations->addWidget(newConversationWrap);
-  conversations->setCurrentWidget(conversations->widget(conversations->count()-1));
+  // Either find or make a new conversation
+  QWidget *currentWidget = grabConversation(IP);
+  
+  // Set the latest conversation to the current widget showing
+  conversations->setCurrentWidget(currentWidget);
 
   // Strip Qt qualities and create a new outward socket
   char* rawIP = stripQ(IP);
@@ -433,7 +455,6 @@ void MainWindow::startConversation(QListWidgetItem* item) {
     // If the connection failed, display it in the new conversation box
     conversations->currentWidget()->findChild<ConversationBox*>()->setText("<span style='color:red;font-size:10px;'>Could not connect to "+IP+"</span>");
   }
-  
 }
 // (END) startConversation
 
@@ -537,3 +558,35 @@ void MainWindow::openSettings() {
   settingsDialog->activateWindow();
 }
 // (END) openSettings
+
+
+
+//----------------------------------------------------------------------
+// IPC SLOTS
+// ==========================================
+//----------------------------------------------------------------------
+
+
+//----------------------------------------------------------------------
+// METHOD: route
+// Parses the string sent from the IPC server and then routes the
+// signal to its respective function call
+//----------------------------------------------------------------------
+void MainWindow::route(QString IP, QString message) {
+
+  // Pull the message type from what was received
+  QString messageType = message.left(3);
+
+  // The router
+  if(messageType == "MES") {            // Message
+    receivedMessage(IP, message.mid(4));
+  } else if(messageType == "OFF") {     // A user disconnected
+    cout << stripQ(IP) << " has logged off!\n";
+  } else if(messageType == "CON") {     // A user connected
+    
+  } else if(messageType == "REQ") {     // A contact list request was received
+    
+  }
+
+}
+// (END) route

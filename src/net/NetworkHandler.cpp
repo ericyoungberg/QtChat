@@ -8,7 +8,9 @@
 #include <arpa/inet.h>
 #include <cstdlib>
 #include "NetworkHandler.h"
-#include "ApplicationBus.h"
+#include "ChatAdaptor.h"
+#include "ChatInterface.h"
+#include "helpers.h"
 
 using namespace std;
 
@@ -16,11 +18,15 @@ using namespace std;
 const char* PORT = "2255";
 
 // Blank constructor
-NetworkHandler::NetworkHandler() {}
+NetworkHandler::NetworkHandler() {
 
-// Overloaded constructor to accept D-Bus
-NetworkHandler::NetworkHandler(ApplicationBus *bus) {
-  ipc = bus; 
+  // Add the Network Handler to the the D-Bus
+  new ChatAdaptor(this); 
+  QDBusConnection::sessionBus().registerObject("/", this);
+
+  // Connect the interface to the Network Handler
+  ipc = new ChatInterface(QString(), QString(),  QDBusConnection::sessionBus(), this);
+
 }
 
 
@@ -84,7 +90,7 @@ int NetworkHandler::createOutwardConnection(char* IP) {
   if(sockfd == -1) cout << "Something went wrong with the socket\n";
 
   // Connect the socket
-  if(connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+  if(::connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
     cout << "Not able to connect to " << IP << endl; 
     //return -1;
   }
@@ -114,10 +120,10 @@ void NetworkHandler::createListener() {
          read_fds;
   int fdmax;
 
-  char IP[24];
-
   char buf[1024];
   int nbytes;
+
+  char rawIP[24];
 
   int yes = 1;
   int i;
@@ -192,27 +198,33 @@ void NetworkHandler::createListener() {
         } else {
           if((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
             if(nbytes == 0) {
-              cout << "Connection closed on " << i << endl; 
+              status = getpeername(i, (struct sockaddr*)&remote_addr, &addrlen);
+              if(status == -1) cout << "Could not retrieve peername\n";
+              struct sockaddr_in *s = (struct sockaddr_in*)&remote_addr;
+              inet_ntop(AF_INET, &s->sin_addr, rawIP, sizeof(rawIP));
+
+              emit queueRouter(QString(rawIP), QString("OFF"));
             }
             close(i);
             FD_CLR(i, &master);
           } else {
 
             // Capture just the message that was most recently received
-            char message[nbytes];
-            strncpy(message, buf, nbytes);
+            char rawMessage[nbytes+5];
+            strcpy(rawMessage, "MES:");
+            strncat(rawMessage, buf, nbytes);
 
             // Get the sender's IP
             status = getpeername(i, (struct sockaddr*)&remote_addr, &addrlen);
             if(status == -1) cout << "Could not retrieve peername\n";
-
             struct sockaddr_in *s = (struct sockaddr_in*)&remote_addr;
-            inet_ntop(AF_INET, &s->sin_addr, IP, sizeof(IP));
+            inet_ntop(AF_INET, &s->sin_addr, rawIP, sizeof(rawIP));
 
-            cout << "IP: " << IP << endl;
+            // Convert to QString
+            QString newIP(rawIP);
+            QString newMessage(rawMessage);
 
-            // Update the GUI
-            ipc->newMessage(IP, message);
+            emit queueRouter(newIP, newMessage);
           } 
         }
       } 

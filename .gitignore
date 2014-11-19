@@ -1,5 +1,6 @@
 src/*.o
 src/moc*
 src/Makefile
+src/QtChat
 QtChat
 resources/

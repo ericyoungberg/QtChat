@@ -9,8 +9,7 @@
 
 #include <QMainWindow>
 #include "../net/NetworkHandler.h"
-#include "../net/ApplicationBus.h"
-
+#include "../net/ChatInterface.h"
 
 class QHBoxLayout;
 class QVBoxLayout;
@@ -33,9 +32,11 @@ class MainWindow : public QMainWindow
   Q_OBJECT
 
 public:
-    MainWindow(ApplicationBus*);
+    MainWindow();
 signals:
-  void receivedMessage(char*, char*);
+  void queueRouter(QString, QString);
+public slots:
+  void route(QString, QString);
 private slots:
   void showAddContact();
   void sendMessage();
@@ -47,16 +48,18 @@ private slots:
   void quitApp();
   void openSettings();
   void setEnvironment();
-  void triggerNewMessage(char*, char*);
 private:
   bool inputIsEmpty();
+  void receivedMessage(QString, QString);
+
+  QWidget* grabConversation(QString);
 
   int servProc;
   int pipeIn;
   int pipeOut;
 
-  ApplicationBus *ipc;
   NetworkHandler *network;
+  ChatInterface *ipc;
 
    QString userName;
    QString realName;

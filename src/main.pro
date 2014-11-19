@@ -5,7 +5,8 @@ QT = gui widgets core dbus
 
 HEADERS += \
   net/NetworkHandler.h \ 
-  net/ApplicationBus.h \
+  net/ChatAdaptor.h \
+  net/ChatInterface.h \
   \
   gui/mainwindow.h \
   gui/newcontactdialog.h \
@@ -18,7 +19,8 @@ SOURCES += \
   main.cpp \
   \
   net/NetworkHandler.cpp \
-  net/ApplicationBus.cpp \
+  net/ChatAdaptor.cpp \
+  net/ChatInterface.cpp \
   \
   gui/mainwindow.cpp \
   gui/newcontactdialog.cpp \

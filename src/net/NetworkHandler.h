@@ -2,7 +2,12 @@
 #define NETWORKHANDLER_H
 
 #include <vector>
-#include "ApplicationBus.h"
+#include <QObject>
+#include <QString>
+#include "ChatInterface.h"
+
+class ChatInterface;
+class QString;
 
 using std::vector;
 
@@ -16,22 +21,26 @@ struct connection {
   }
 };
 
-class NetworkHandler
+class NetworkHandler : public QObject
 {
+  Q_OBJECT
 
 public:
   NetworkHandler();
-  NetworkHandler(ApplicationBus*);
+  virtual ~NetworkHandler() {};
 
   void transmit(char*, char*);
-  int createOutwardConnection(char*);
   void createListener();
+
+  int createOutwardConnection(char*);
+
+signals:
+  void queueRouter(QString, QString);
 
 private:
   vector<connection> connections;
 
-  ApplicationBus *ipc;
-
+  ChatInterface *ipc;
 };
 
 #endif
