@@ -211,11 +211,9 @@ void MainWindow::sendMessage() {
     currentConversation->append(message);
     
     // Send the message to the user
-    char* input = stripQ(userInput->toPlainText());
-    char* addr = stripQ(currentConversation->conversationID);
 
     // Transmit the message across the internet of things
-    network->transmit(addr, input);
+    network->transmit((char*)currentConversation->conversationID.toStdString().c_str(), (char*)userInput->toPlainText().toStdString().c_str());
 
     userInput->setText("");      // reset the input field for the user
   }
