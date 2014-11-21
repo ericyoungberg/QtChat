@@ -38,8 +38,6 @@ void NetworkHandler::transmit(char* IP, char* message) {
   // Number of bytes sent
   int nbytes;
 
-  cout << message << endl;
-
   // Find a connection that matches the IP destination passed to the method
   for(unsigned i=0;i<connections.size();i++) {
     if(strcmp(connections.at(i).IP, IP) == 0) {
@@ -50,11 +48,15 @@ void NetworkHandler::transmit(char* IP, char* message) {
         return; // Leave if we couldn't send anything
       }
 
-      // Report bytes sent
-      cout << "BYTES SENT: " << nbytes << endl; 
-      cout << message << endl;
+      // Exit this function calmly
+      return;
     }
   }
+
+  // If we didn't find a connection with this user, let's try building one
+  // then re-transmit the message
+  if(createOutwardConnection(IP) == 0) transmit(IP, message);
+
 }
 // (END) transmit
 

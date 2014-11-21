@@ -13,4 +13,6 @@ class QString;
 char* stripQ(QString); 
 char* createFilePath(const char*, char*, const char*);
 
+QIcon onlineStatusIcon(bool);
+
 #endif

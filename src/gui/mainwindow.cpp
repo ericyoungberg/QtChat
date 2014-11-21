@@ -159,14 +159,17 @@ MainWindow::MainWindow() {
   // SETUP
   // =======================================
 
-  network = new NetworkHandler;
 
+  // IPC via Qt's D-Bus API
   new ChatAdaptor(this);
   QDBusConnection::sessionBus().registerObject("/", this);
 
   ipc = new ChatInterface(QString(), QString(), QDBusConnection::sessionBus(), this);
   
   connect(ipc, SIGNAL(queueRouter(QString, QString)), this, SLOT(route(QString, QString)));
+
+
+  network = new NetworkHandler;       // Handles all of your outward network calls
 
   setEnvironment();                   // load the settings file
 
@@ -181,6 +184,8 @@ MainWindow::MainWindow() {
   hadPreviousConversation = false;    // Initialize this value as false at the startup 
   currentConversation[0] = '\0';      // Initialize the curretConversation array
 
+  broadcastEntrance();                // Let everyone in your contacts list know you have arrived!
+
   setCentralWidget(window);           // own it
 }
 // (END) MainWindow
@@ -192,6 +197,18 @@ MainWindow::MainWindow() {
  * METHODS                                                              |
  * ---------------------------------------------------------------------|
 */
+
+
+//----------------------------------------------------------------------
+// METHOD: broadcastEntrance
+// Let everyone know that you are online
+//----------------------------------------------------------------------
+void MainWindow::broadcastEntrance() {
+  for(int i=0;i<contactList->count();i++) {
+    network->transmit((char*)contactList->item(i)->text().toStdString().c_str(), (char*)"CON");
+  } 
+}
+// (END) broadcastEntrance
 
 
 //----------------------------------------------------------------------
@@ -217,25 +234,6 @@ void MainWindow::sendMessage() {
   }
  }
 // (END) sendMessage
-
-
-void MainWindow::closeEvent(QCloseEvent *event) {
-  emit quitApp();
-  event->accept();
-}
-
-//----------------------------------------------------------------------
-// METHOD: receivedMessage
-// Handles incoming messages
-//----------------------------------------------------------------------
-void MainWindow::receivedMessage(QString IP, QString message) {
-  QWidget *conversation = grabConversation(IP);
-
-  conversations->setCurrentWidget(conversation);
-
-  conversations->currentWidget()->findChild<ConversationBox*>()->append("<span style='color:blue;'>"+IP+":</span> "+message);
-}
-// (END) receivedMessage
 
 
 //----------------------------------------------------------------------
@@ -274,7 +272,7 @@ void MainWindow::setEnvironment() {
     contactsFile >> rawIP;
     // Read until the end of file
     while(!contactsFile.eof()) {
-      contactList->addItem(rawIP);
+      contactList->addItem(new QListWidgetItem(onlineStatusIcon(false), rawIP));
       contactsFile >> rawIP;
     }
 
@@ -286,8 +284,8 @@ void MainWindow::setEnvironment() {
 
 
 //----------------------------------------------------------------------
-// METHOD: setEnvironment
-// Loads the settings file
+// METHOD: grabConversation
+// Finds a ConversationBox. If we can't then we create a new one.
 //----------------------------------------------------------------------
 QWidget* MainWindow::grabConversation(QString IP) {
   //Setup a new conversation box if there is not one found/already setup
@@ -322,7 +320,18 @@ QWidget* MainWindow::grabConversation(QString IP) {
   return conversations->widget(conversations->count()-1);
 
 }
+// (END) grabConversation
 
+
+//----------------------------------------------------------------------
+// METHOD: closeEvent
+// Overrides the default QDialog close event method
+//----------------------------------------------------------------------
+void MainWindow::closeEvent(QCloseEvent *event) {
+  emit quitApp();
+  event->accept();
+}
+// (END) closeEvent
 
 //----------------------------------------------------------------------
 // ACTION SLOTS
@@ -374,7 +383,7 @@ void MainWindow::addUserToContacts(QString userAddress) {
   }
 
   // Append the user to GUI contact list
-  contactList->addItem(userAddress);
+  contactList->addItem(new QListWidgetItem(onlineStatusIcon(true), userAddress));
 }
 // (END) addUserToContacts
 
@@ -454,7 +463,7 @@ void MainWindow::startConversation(QListWidgetItem* item) {
   char* rawIP = stripQ(IP);
   if(network->createOutwardConnection(rawIP) == -1) {
     // If the connection failed, display it in the new conversation box
-    conversations->currentWidget()->findChild<ConversationBox*>()->setText("<span style='color:red;font-size:10px;'>Could not connect to "+IP+"</span>");
+    conversations->currentWidget()->findChild<ConversationBox*>()->append("<span style='color:red;font-size:10px;'>Could not connect to "+IP+"</span>");
   }
 }
 // (END) startConversation
@@ -582,12 +591,68 @@ void MainWindow::route(QString IP, QString message) {
   if(messageType == "MES") {            // Message
     receivedMessage(IP, message.mid(4));
   } else if(messageType == "OFF") {     // A user disconnected
-    cout << stripQ(IP) << " has logged off!\n";
+    loggedOff(IP);
   } else if(messageType == "CON") {     // A user connected
-    
+    toggleOnlineStatus(IP);    
   } else if(messageType == "REQ") {     // A contact list request was received
     
   }
 
 }
 // (END) route
+
+
+//----------------------------------------------------------------------
+// METHOD: receivedMessage
+// Handles incoming messages
+//----------------------------------------------------------------------
+void MainWindow::receivedMessage(QString IP, QString message) {
+  // Find the conversation window
+  QWidget *conversation = grabConversation(IP);
+
+  // Display the message in that window
+  conversations->widget(conversations->indexOf(conversation))->findChild<ConversationBox*>()->append("<span style='color:blue;'>"+IP+":</span> "+message);
+}
+// (END) receivedMessage
+
+
+//----------------------------------------------------------------------
+// METHOD: loggedOff
+// Displays that the current user is offline
+//----------------------------------------------------------------------
+void MainWindow::loggedOff(QString IP) {
+
+  // Change the online status of that user
+  toggleOnlineStatus(IP);
+
+  // Find the conversation window
+  QWidget *conversation = grabConversation(IP);
+
+  // Report to the user that they are offline now
+  conversations->widget(conversations->indexOf(conversation))->findChild<ConversationBox*>()->append("<span style='color:#aa0000;font-size:10px;'>"+IP+" has logged off...</span>");
+}
+// (END) loggedOff
+
+
+//----------------------------------------------------------------------
+// METHOD: toggleOnlineStatus
+// Changes the online status of a user
+//----------------------------------------------------------------------
+void MainWindow::toggleOnlineStatus(QString IP) {
+  
+  // Find the contact
+  for(int i=0;i<contactList->count();i++) {
+    if(contactList->item(i)->text() == IP) {
+      QListWidgetItem *contact = contactList->item(i);  // Found the contact
+
+      // Toggle the icon
+      if(contact->icon().name() == "src/gui/icons/online.png") {
+        contact->setIcon(onlineStatusIcon(false)); 
+      } else {
+        contact->setIcon(onlineStatusIcon(true)); 
+      } 
+    } 
+  }
+
+}
+// (END) toggleOnlineStatus

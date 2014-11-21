@@ -51,8 +51,12 @@ private slots:
   void setEnvironment();
 private:
   bool inputIsEmpty();
-  void receivedMessage(QString, QString);
+  void broadcastEntrance();
   void closeEvent(QCloseEvent*);
+
+  void receivedMessage(QString, QString);
+  void loggedOff(QString);
+  void toggleOnlineStatus(QString);
 
   QWidget* grabConversation(QString);
 

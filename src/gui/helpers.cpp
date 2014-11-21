@@ -31,3 +31,18 @@ char* createFilePath(const char* ch1, char* ch2, const char* ch3) {
   strcat(ch4, ch3);
   return ch4;
 }
+// (END) createFilePath
+
+
+//----------------------------------------------------------------------
+// FUNCTION: onlineStatusIcon
+// Builds an online status QIcon
+//----------------------------------------------------------------------
+QIcon onlineStatusIcon(bool online) {
+  QString path = (online) ? "src/gui/icons/online.png" : "src/gui/icons/offline.png";
+  QIcon icon;
+  icon.addFile(path); 
+
+  return icon;
+}
+// (END) onlineStatusIcon
