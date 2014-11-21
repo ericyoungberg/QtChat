@@ -11,6 +11,8 @@
 #include <QtDBus>
 #include <iostream>
 #include <unistd.h>
+#include <sys/prctl.h>
+#include <signal.h>
 #include "gui/mainwindow.h"
 #include "net/NetworkHandler.h"
 
@@ -33,6 +35,8 @@ int main(int argc, char *argv[]) {
   // The first for the network listener
   // The second for the GUI
   if(!fork()) {
+    prctl(PR_SET_PDEATHSIG, SIGHUP);
+
     // Create a listener to accept incoming connections for the GUI
     NetworkHandler *network = new NetworkHandler();
     network->createListener();

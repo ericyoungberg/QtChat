@@ -91,7 +91,7 @@ int NetworkHandler::createOutwardConnection(char* IP) {
   // Connect the socket
   if(::connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
     cout << "Not able to connect to " << IP << endl; 
-    //return -1;
+    return -1;
   }
 
   // Save the socket now that it has been setup
@@ -112,8 +112,6 @@ int NetworkHandler::createOutwardConnection(char* IP) {
 // respsective transmissions
 //----------------------------------------------------------------------
 void NetworkHandler::createListener() {
-
-  cout << "Created the listener!\n";
 
   fd_set master,
          read_fds;

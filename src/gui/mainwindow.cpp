@@ -219,6 +219,11 @@ void MainWindow::sendMessage() {
 // (END) sendMessage
 
 
+void MainWindow::closeEvent(QCloseEvent *event) {
+  emit quitApp();
+  event->accept();
+}
+
 //----------------------------------------------------------------------
 // METHOD: receivedMessage
 // Handles incoming messages
@@ -508,7 +513,7 @@ void MainWindow::closeConversation() {
 // Closes the application after writing everything that happened that session
 //----------------------------------------------------------------------
 void MainWindow::quitApp() {
-  
+
   // Make sure to write all open conversations to disk
   for(int i=0;i<conversations->count();i++) {
 

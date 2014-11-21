@@ -35,6 +35,7 @@ public:
     MainWindow();
 signals:
   void queueRouter(QString, QString);
+  void receivedMessage(char*, char*);
 public slots:
   void route(QString, QString);
 private slots:
@@ -51,6 +52,7 @@ private slots:
 private:
   bool inputIsEmpty();
   void receivedMessage(QString, QString);
+  void closeEvent(QCloseEvent*);
 
   QWidget* grabConversation(QString);
 
