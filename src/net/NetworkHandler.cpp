@@ -10,7 +10,6 @@
 #include "NetworkHandler.h"
 #include "ChatAdaptor.h"
 #include "ChatInterface.h"
-#include "helpers.h"
 
 using namespace std;
 

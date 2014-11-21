@@ -232,7 +232,7 @@ void MainWindow::receivedMessage(QString IP, QString message) {
 
   conversations->setCurrentWidget(conversation);
 
-  conversations->currentWidget()->findChild<ConversationBox*>()->append("<span style='color:blue;'>"+IP+"</span>"+message);
+  conversations->currentWidget()->findChild<ConversationBox*>()->append("<span style='color:blue;'>"+IP+":</span> "+message);
 }
 // (END) receivedMessage
 
