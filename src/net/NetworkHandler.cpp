@@ -81,7 +81,7 @@ int NetworkHandler::createOutwardConnection(char* IP) {
   hints.ai_socktype = SOCK_STREAM;
 
   // Make the info
-  int error = getaddrinfo(IP, "2238", &hints, &servinfo);
+  int error = getaddrinfo(IP, PORT, &hints, &servinfo);
   if(error) cout << "Could not get the addrinfo\n";
 
   // Retrieve a socket for the connection

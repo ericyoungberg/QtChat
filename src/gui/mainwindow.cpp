@@ -209,8 +209,6 @@ void MainWindow::sendMessage() {
     // Write the message to the ConversationBox
     ConversationBox* currentConversation = conversations->currentWidget()->findChild<ConversationBox*>();
     currentConversation->append(message);
-    
-    // Send the message to the user
 
     // Transmit the message across the internet of things
     network->transmit((char*)currentConversation->conversationID.toStdString().c_str(), (char*)userInput->toPlainText().toStdString().c_str());
