@@ -228,7 +228,7 @@ void MainWindow::sendMessage() {
     currentConversation->append(message);
 
     // Append the message command to the user input before transmitting
-    QString input("MES" + userInput->toPlainText());
+    QString input("MES " + userInput->toPlainText());
 
     // Transmit the message across the internet of things
     network->transmit((char*)currentConversation->conversationID.toStdString().c_str(), (char*)input.toStdString().c_str());
@@ -595,8 +595,10 @@ void MainWindow::route(QString IP, QString message) {
     receivedMessage(IP, message.mid(4));
   } else if(messageType == "OFF") {     // A user disconnected
     loggedOff(IP);
+  } else if(messageType == "REC") {     // Handshake from a user that read your connection reply confirming they are online too
+    toggleOnlineStatus(IP);
   } else if(messageType == "CON") {     // A user connected
-    toggleOnlineStatus(IP);    
+    connected(IP);
   } else if(messageType == "REQ") {     // A contact list request was received
     
   }
@@ -635,6 +637,21 @@ void MainWindow::loggedOff(QString IP) {
   conversations->widget(conversations->indexOf(conversation))->findChild<ConversationBox*>()->append("<span style='color:#aa0000;font-size:10px;'>"+IP+" has logged off...</span>");
 }
 // (END) loggedOff
+
+
+//----------------------------------------------------------------------
+// METHOD: connected
+// Changes the online status of a user and sends a handshake back
+//----------------------------------------------------------------------
+void MainWindow::connected(QString IP) {
+
+  // Change the online status of that user
+  toggleOnlineStatus(IP);
+
+  // Transmit a handshake command to let that user know you are online as well
+  network->transmit((char*)IP.toStdString().c_str(), (char*)"REC");
+}
+// (END) connected
 
 
 //----------------------------------------------------------------------
