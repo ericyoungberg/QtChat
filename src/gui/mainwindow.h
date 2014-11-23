@@ -56,7 +56,7 @@ private:
 
   void receivedMessage(QString, QString);
   void loggedOff(QString);
-  void toggleOnlineStatus(QString);
+  void toggleOnlineStatus(QString, bool);
   void connected(QString);
 
   QWidget* grabConversation(QString);

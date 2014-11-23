@@ -598,7 +598,7 @@ void MainWindow::route(QString IP, QString message) {
   } else if(messageType == "OFF") {     // A user disconnected
     loggedOff(IP);
   } else if(messageType == "REC") {     // Handshake from a user that read your connection reply confirming they are online too
-    toggleOnlineStatus(IP);
+    toggleOnlineStatus(IP, true);
   } else if(messageType == "CON") {     // A user connected
     connected(IP);
   } else if(messageType == "REQ") {     // A contact list request was received
@@ -630,7 +630,7 @@ void MainWindow::receivedMessage(QString IP, QString message) {
 void MainWindow::loggedOff(QString IP) {
 
   // Change the online status of that user
-  toggleOnlineStatus(IP);
+  toggleOnlineStatus(IP, false);
 
   // Find the conversation window
   QWidget *conversation = grabConversation(IP);
@@ -648,7 +648,7 @@ void MainWindow::loggedOff(QString IP) {
 void MainWindow::connected(QString IP) {
 
   // Change the online status of that user
-  toggleOnlineStatus(IP);
+  toggleOnlineStatus(IP, true);
 
   // Transmit a handshake command to let that user know you are online as well
   network->transmit((char*)IP.toStdString().c_str(), (char*)"REC");
@@ -660,19 +660,15 @@ void MainWindow::connected(QString IP) {
 // METHOD: toggleOnlineStatus
 // Changes the online status of a user
 //----------------------------------------------------------------------
-void MainWindow::toggleOnlineStatus(QString IP) {
+void MainWindow::toggleOnlineStatus(QString IP, bool onlineStatus) {
   
   // Find the contact
   for(int i=0;i<contactList->count();i++) {
     if(contactList->item(i)->text() == IP) {
       QListWidgetItem *contact = contactList->item(i);  // Found the contact
 
-      // Toggle the icon
-      if(contact->icon().name() == "src/gui/icons/online.png") {
-        contact->setIcon(onlineStatusIcon(false)); 
-      } else {
-        contact->setIcon(onlineStatusIcon(true)); 
-      } 
+      // Change the online status
+      contact->setIcon(onlineStatusIcon(onlineStatus)); 
     } 
   }
 
