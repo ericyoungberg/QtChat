@@ -227,8 +227,11 @@ void MainWindow::sendMessage() {
     ConversationBox* currentConversation = conversations->currentWidget()->findChild<ConversationBox*>();
     currentConversation->append(message);
 
+    // Append the message command to the user input before transmitting
+    QString input("MES" + userInput->toPlainText());
+
     // Transmit the message across the internet of things
-    network->transmit((char*)currentConversation->conversationID.toStdString().c_str(), (char*)userInput->toPlainText().toStdString().c_str());
+    network->transmit((char*)currentConversation->conversationID.toStdString().c_str(), (char*)input.toStdString().c_str());
 
     userInput->setText("");      // reset the input field for the user
   }

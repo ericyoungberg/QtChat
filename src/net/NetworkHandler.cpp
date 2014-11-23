@@ -209,9 +209,8 @@ void NetworkHandler::createListener() {
           } else {
 
             // Capture just the message that was most recently received
-            char rawMessage[nbytes+5];
-            strcpy(rawMessage, "MES:");
-            strncat(rawMessage, buf, nbytes);
+            char rawMessage[nbytes];
+            strncpy(rawMessage, buf, nbytes);
 
             // Get the sender's IP
             status = getpeername(i, (struct sockaddr*)&remote_addr, &addrlen);
