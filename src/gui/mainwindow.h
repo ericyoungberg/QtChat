@@ -51,7 +51,7 @@ private slots:
   void setEnvironment();
 private:
   bool inputIsEmpty();
-  void broadcastEntrance();
+  void broadcast(char*);
   void closeEvent(QCloseEvent*);
 
   void receivedMessage(QString, QString);

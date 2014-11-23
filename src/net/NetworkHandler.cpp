@@ -91,10 +91,7 @@ int NetworkHandler::createOutwardConnection(char* IP) {
   if(sockfd == -1) cout << "Something went wrong with the socket\n";
 
   // Connect the socket
-  if(::connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-    cout << "Not able to connect to " << IP << endl; 
-    return -1;
-  }
+  if(::connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) return -1;
 
   // Save the socket now that it has been setup
   newConnection.sockfd = sockfd;

@@ -184,7 +184,7 @@ MainWindow::MainWindow() {
   hadPreviousConversation = false;    // Initialize this value as false at the startup 
   currentConversation[0] = '\0';      // Initialize the curretConversation array
 
-  broadcastEntrance();                // Let everyone in your contacts list know you have arrived!
+  broadcast((char*)"CON");                // Let everyone in your contacts list know you have arrived!
 
   setCentralWidget(window);           // own it
 }
@@ -200,12 +200,12 @@ MainWindow::MainWindow() {
 
 
 //----------------------------------------------------------------------
-// METHOD: broadcastEntrance
-// Let everyone know that you are online
+// METHOD: broadcast
+// Sends everyone on the contact list a message
 //----------------------------------------------------------------------
-void MainWindow::broadcastEntrance() {
+void MainWindow::broadcast(char* action) {
   for(int i=0;i<contactList->count();i++) {
-    network->transmit((char*)contactList->item(i)->text().toStdString().c_str(), (char*)"CON");
+    network->transmit((char*)contactList->item(i)->text().toStdString().c_str(), action);
   } 
 }
 // (END) broadcastEntrance
@@ -546,6 +546,8 @@ void MainWindow::quitApp() {
       }
     }
   }
+
+  broadcast((char*)"OFF"); // Let everyone on your contact list know that you have now logged off
 
   // Close the application
   close();
