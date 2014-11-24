@@ -122,7 +122,7 @@ MainWindow::MainWindow() {
   char defaultTitle[16] = "Default";
   defaultConversation = new ConversationBox(defaultTitle);
   conversations->addWidget(defaultConversation);
-  chatLayout->addWidget(conversations, 1);                   // setup
+  chatLayout->addWidget(conversations, 1);                // setup
   chatLayout->addLayout(inputLayout);
   
 
@@ -177,14 +177,16 @@ MainWindow::MainWindow() {
   window->setLayout(mainLayout);      // set the content
   window->setMinimumSize(700, 550);   // define the dimensions
 
-  // NULL initialize the dialogs to speed up launch and preserve memory
+  // initialize the dialogs to speed up launch
   addContactDialog = 0;
   settingsDialog = 0;
 
   hadPreviousConversation = false;    // Initialize this value as false at the startup 
-  currentConversation[0] = '\0';      // Initialize the curretConversation array
+  currentConversation[0] = '\0';      // Initialize the currentConversation array
 
-  broadcast((char*)"CON");                // Let everyone in your contacts list know you have arrived!
+  broadcast((char*)"CON");            // Let everyone in your contacts list know you are online
+                                      // Doing this before showing the window cause a stale window is worse
+                                      // than a window that hasn't shown yet (loading)
 
   setCentralWidget(window);           // own it
 }
@@ -257,6 +259,7 @@ void MainWindow::setEnvironment() {
 
   // Make the resources directory if one does not exist
   mkdir("resources", 0700);
+  mkdir("resources/hist", 0700);
 
   // Load the settings
   QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
@@ -290,7 +293,7 @@ void MainWindow::setEnvironment() {
 // METHOD: grabConversation
 // Finds a ConversationBox. If we can't then we create a new one.
 //----------------------------------------------------------------------
-QWidget* MainWindow::grabConversation(QString IP) {
+QWidget* MainWindow::grabConversation(QString IP, bool create = true) {
   //Setup a new conversation box if there is not one found/already setup
   //If so, then exit
   //If not found, then move forward to create a new conversation box
@@ -304,6 +307,11 @@ QWidget* MainWindow::grabConversation(QString IP) {
         return conversations->widget(i);  
       } 
     }
+  }
+
+  // Don't create a new widget if we are only wanting one that already exists
+  if(!create) {
+    return NULL; 
   }
 
   //Create a new conversation box
@@ -535,14 +543,18 @@ void MainWindow::quitApp() {
       // We don't want to write the default window
       if(conversation->conversationID != "Default") {
 
+        QString fileName("resources/hist/"+ conversation->conversationID + ".hist");
+
         // Opens up the file to write to 
-        QFile file("resources/hist/" + conversation->conversationID + ".hist");
+        QFile file(fileName);
 
         // If the file is open, then write the current conversation to it
         if(file.open(QIODevice::WriteOnly | QIODevice::Truncate)) {
           QTextStream output(&file);
           output << conversation->toHtml();   // Write as HTML since that's how everything is formatted
-        }    
+        } else {
+          cout << "Could not open up the file...\n";
+        } 
       }
     }
   }
@@ -551,7 +563,6 @@ void MainWindow::quitApp() {
 
   // Close the application
   close();
-
 }
 // (END) quitApp
 
@@ -633,10 +644,12 @@ void MainWindow::loggedOff(QString IP) {
   toggleOnlineStatus(IP, false);
 
   // Find the conversation window
-  QWidget *conversation = grabConversation(IP);
+  QWidget *conversation = grabConversation(IP, false);
 
-  // Report to the user that they are offline now
-  conversations->widget(conversations->indexOf(conversation))->findChild<ConversationBox*>()->append("<span style='color:#aa0000;font-size:10px;'>"+IP+" has logged off...</span>");
+  // Report to the user that they are offline now only if they have an open conversation with them currently
+  if(conversation) {
+    conversations->widget(conversations->indexOf(conversation))->findChild<ConversationBox*>()->append("<span style='color:#aa0000;font-size:10px;'>"+IP+" has logged off...</span>");
+  }
 }
 // (END) loggedOff
 
@@ -653,6 +666,7 @@ void MainWindow::connected(QString IP) {
   // Transmit a handshake command to let that user know you are online as well
   network->transmit((char*)IP.toStdString().c_str(), (char*)"REC");
 }
+  
 // (END) connected
 
 

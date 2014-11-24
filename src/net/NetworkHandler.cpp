@@ -193,21 +193,12 @@ void NetworkHandler::createListener() {
           }
         } else {
           if((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
-            if(nbytes == 0) {
-              status = getpeername(i, (struct sockaddr*)&remote_addr, &addrlen);
-              if(status == -1) cout << "Could not retrieve peername\n";
-              struct sockaddr_in *s = (struct sockaddr_in*)&remote_addr;
-              inet_ntop(AF_INET, &s->sin_addr, rawIP, sizeof(rawIP));
-
-              emit queueRouter(QString(rawIP), QString("OFF"));
-            }
             close(i);
             FD_CLR(i, &master);
           } else {
 
-            // Capture just the message that was most recently received
-            char rawMessage[nbytes];
-            strncpy(rawMessage, buf, nbytes);
+            // Grab only the current size of the message from the buffer
+            buf[nbytes] = '\0';
 
             // Get the sender's IP
             status = getpeername(i, (struct sockaddr*)&remote_addr, &addrlen);
@@ -217,7 +208,7 @@ void NetworkHandler::createListener() {
 
             // Convert to QString
             QString newIP(rawIP);
-            QString newMessage(rawMessage);
+            QString newMessage(buf);
 
             emit queueRouter(newIP, newMessage);
           } 

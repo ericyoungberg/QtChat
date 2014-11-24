@@ -35,7 +35,6 @@ public:
     MainWindow();
 signals:
   void queueRouter(QString, QString);
-  void receivedMessage(char*, char*);
 public slots:
   void route(QString, QString);
 private slots:
@@ -59,7 +58,7 @@ private:
   void toggleOnlineStatus(QString, bool);
   void connected(QString);
 
-  QWidget* grabConversation(QString);
+  QWidget* grabConversation(QString, bool);
 
   int servProc;
   int pipeIn;
