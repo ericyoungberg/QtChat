@@ -35,6 +35,9 @@ NetworkHandler::NetworkHandler() {
 //----------------------------------------------------------------------
 void NetworkHandler::transmit(char* IP, char* message) {
 
+
+  cout << "OUT: " << message << ", IP: " << IP << endl;
+
   // Number of bytes sent
   int nbytes;
 
@@ -55,7 +58,10 @@ void NetworkHandler::transmit(char* IP, char* message) {
 
   // If we didn't find a connection with this user, let's try building one
   // then re-transmit the message
-  if(createOutwardConnection(IP) == 0) transmit(IP, message);
+  if(createOutwardConnection(IP) == 0) {
+    cout << "TRANSMIT RETRIED... AND SUCCEEDED! SHREKT M8!\n";
+    transmit(IP, message);
+  }
 
 }
 // (END) transmit
@@ -91,7 +97,10 @@ int NetworkHandler::createOutwardConnection(char* IP) {
   if(sockfd == -1) cout << "Something went wrong with the socket\n";
 
   // Connect the socket
-  if(::connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) return -1;
+  if(::connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
+    cout << "Connection is futile!\n"; 
+    return -1;
+  }
 
   // Save the socket now that it has been setup
   newConnection.sockfd = sockfd;
@@ -199,6 +208,8 @@ void NetworkHandler::createListener() {
 
             // Grab only the current size of the message from the buffer
             buf[nbytes] = '\0';
+
+            cout << "IN: " << buf << endl;
 
             // Get the sender's IP
             status = getpeername(i, (struct sockaddr*)&remote_addr, &addrlen);

@@ -26,8 +26,6 @@ using namespace std;
 
 #define CONTACTS_FILE "resources/contacts"
 #define SETTINGS_FILE "resources/settings.ini"
-#define HIST_SUFFIX ".hist"
-#define HIST_PREFIX "resources/hist/"
 
 // (end) ENVIRONMENT
 
