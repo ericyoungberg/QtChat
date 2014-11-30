@@ -8,6 +8,10 @@ echo
 echo '-------------- Building QtChat'
 echo
 
+# Build a Makefile based upon the Qt libraries
+cd src && qmake && cd ..
+
+# Make the application
 make -C ./src
 
 if [ $? != 0 ]; then
