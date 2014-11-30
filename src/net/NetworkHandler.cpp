@@ -48,8 +48,6 @@ void NetworkHandler::transmit(char* IP, char* message) {
   for(unsigned i=0;i<connections.size();i++) {
     if(strcmp(connections.at(i).IP, IP) == 0) {
 
-      cout << "OUT: " << message << ", " << IP << endl;
-
       // Try to send the message over the socket
       if((nbytes = send(connections.at(i).sockfd, message, strlen(message), 0)) == -1) {
         cout << "Could not send the message to " << IP << endl;
@@ -64,7 +62,6 @@ void NetworkHandler::transmit(char* IP, char* message) {
   // If we didn't find a connection with this user, let's try building one
   // then re-transmit the message
   if(createOutwardConnection(IP) == 0) {
-    cout << "Recreated connection ... \n";
     transmit(IP, message);
   }
 
@@ -72,12 +69,16 @@ void NetworkHandler::transmit(char* IP, char* message) {
 // (END) transmit
 
 
+//----------------------------------------------------------------------
+// METHOD: deleteOutwardConnection
+// Removes dead connections from the connections vector
+//----------------------------------------------------------------------
 void NetworkHandler::deleteOutwardConnection(char* IP) {
 
   // Find a connection that matches the IP destination passed to the method
   for(unsigned i=0;i<connections.size();i++) {
     if(strcmp(connections.at(i).IP, IP) == 0) {
-      connections.erase(i); // Remove the connection from the list of current connections
+      connections.erase(connections.begin() + i); // Remove the connection from the list of current connections
     }
   }
 }
@@ -115,7 +116,6 @@ int NetworkHandler::createOutwardConnection(char* IP) {
 
   // Connect the socket
   if(::connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-    cout << "Connection unsuccessful\n"; 
     return -1;
   }
 
@@ -246,16 +246,12 @@ void NetworkHandler::createListener() {
 
           // Try to receive data on the socket
           if((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
-            
-            cout << "DELETING " << i << endl;
 
             // Close the socket if we have lose the connection 
             FD_CLR(i, &master);
             close(i);
 
           } else {  // If we did receive something from the connection
-
-            cout << "SOCK: " << i << ", MAX: " << fdmax << endl;
 
             // Grab only the current size of the message from the buffer
             buf[nbytes] = '\0';

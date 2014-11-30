@@ -152,7 +152,6 @@ MainWindow::MainWindow() {
   connect(addContactButton, SIGNAL(clicked()), this, SLOT(showAddContact()));
   connect(userInput, SIGNAL(enterKeyPressed()), this, SLOT(sendMessage()));
   connect(contactList, SIGNAL(itemDoubleClicked(QListWidgetItem*)), this, SLOT(startConversation(QListWidgetItem*)));
-  connect(this, SIGNAL(receivedMessage(char*, char*)), this, SLOT(triggerNewMessage(char*, char*)));
 
   
   // SETUP
@@ -607,16 +606,12 @@ void MainWindow::route(QString IP, QString message) {
 
   // The router
   if(messageType == "MES") {            // Message
-    cout << "MES, " << stripQ(IP) << endl;
     receivedMessage(IP, message.mid(4));
   } else if(messageType == "OFF") {     // A user disconnected
-    cout << "OFF, " << stripQ(IP) << endl;
     loggedOff(IP);
   } else if(messageType == "REC") {     // Handshake from a user that read your connection reply confirming they are online too
-    cout << "REC, " << stripQ(IP) << endl;
     toggleOnlineStatus(IP, true);
   } else if(messageType == "CON") {     // A user connected
-    cout << "CON, " << stripQ(IP) << endl;
     connected(IP);
   } 
 

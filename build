@@ -26,6 +26,7 @@ if [ "$1" == "-c" ]; then
   echo
 
   rm src/*.o
+  rm src/moc*
 fi
 
 if [ -e './QtChat' ]; then

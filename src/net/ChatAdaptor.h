@@ -2,6 +2,7 @@
 #define CHATADAPTOR_H
 
 #include <QtDBus>
+
 #include "NetworkHandler.h"
 
 // -------------------------------------------------------------
