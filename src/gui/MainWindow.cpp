@@ -393,7 +393,10 @@ void MainWindow::addUserToContacts(QString userAddress) {
   }
 
   // Append the user to GUI contact list
-  contactList->addItem(new QListWidgetItem(onlineStatusIcon(true), userAddress));
+  contactList->addItem(new QListWidgetItem(onlineStatusIcon(false), userAddress));
+
+  // Check to see if the newly added user is online
+  network->transmit((char*)userAddress.toStdString().c_str(), (char*)"CON");
 }
 // (END) addUserToContacts
 
@@ -604,16 +607,18 @@ void MainWindow::route(QString IP, QString message) {
 
   // The router
   if(messageType == "MES") {            // Message
+    cout << "MES, " << stripQ(IP) << endl;
     receivedMessage(IP, message.mid(4));
   } else if(messageType == "OFF") {     // A user disconnected
+    cout << "OFF, " << stripQ(IP) << endl;
     loggedOff(IP);
   } else if(messageType == "REC") {     // Handshake from a user that read your connection reply confirming they are online too
+    cout << "REC, " << stripQ(IP) << endl;
     toggleOnlineStatus(IP, true);
   } else if(messageType == "CON") {     // A user connected
+    cout << "CON, " << stripQ(IP) << endl;
     connected(IP);
-  } else if(messageType == "REQ") {     // A contact list request was received
-    
-  }
+  } 
 
 }
 // (END) route

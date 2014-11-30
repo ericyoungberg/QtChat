@@ -48,6 +48,8 @@ void NetworkHandler::transmit(char* IP, char* message) {
   for(unsigned i=0;i<connections.size();i++) {
     if(strcmp(connections.at(i).IP, IP) == 0) {
 
+      cout << "OUT: " << message << ", " << IP << endl;
+
       // Try to send the message over the socket
       if((nbytes = send(connections.at(i).sockfd, message, strlen(message), 0)) == -1) {
         cout << "Could not send the message to " << IP << endl;
