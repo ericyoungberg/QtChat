@@ -72,10 +72,12 @@ private:
   ChatInterface *ipc;
 
    QString userName;
-   QString realName;
+   QString userColor;
 
    char currentConversation[160];
    bool hadPreviousConversation;
+
+   bool initialLoad;
 
    QHBoxLayout *mainLayout; 
    QHBoxLayout *inputLayout;

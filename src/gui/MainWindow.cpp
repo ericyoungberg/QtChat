@@ -169,6 +169,7 @@ MainWindow::MainWindow() {
 
   network = new NetworkHandler;       // Handles all of your outward network calls
 
+  initialLoad = true;                 // Indicate that this is the first time setting the environment
   setEnvironment();                   // load the settings file
 
   QWidget *window = new QWidget;      // create the window
@@ -221,14 +222,14 @@ void MainWindow::sendMessage() {
   if(inputIsEmpty()) {
 
     // Format the message to be presented
-    QString message = "<span style='color:red;'>"+userName+": </span>"+userInput->toPlainText();
+    QString message = "<span style='color:"+userColor+";'>"+userName+": </span>"+userInput->toPlainText();
 
     // Write the message to the ConversationBox
     ConversationBox* currentConversation = conversations->currentWidget()->findChild<ConversationBox*>();
     currentConversation->append(message);
 
     // Append the message command to the user input before transmitting
-    QString input("MES " + userInput->toPlainText());
+    QString input("MES " + message);
 
     // Transmit the message across the internet of things
     network->transmit((char*)currentConversation->conversationID.toStdString().c_str(), (char*)input.toStdString().c_str());
@@ -261,27 +262,33 @@ void MainWindow::setEnvironment() {
 
   // Load the settings
   QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
-  userName = settings.value("user_name", "").toString();
-  realName = settings.value("real_name", "").toString();
+  userName = settings.value("user_name", "NewUser").toString();
+  userColor = settings.value("user_color", "red").toString();
 
-  // Load the contacts
-  ifstream contactsFile;
-  contactsFile.open(CONTACTS_FILE);
+  // Only load in the contacts if it is the first time setting the environment
+  if(initialLoad) {
 
-  // Placeholders
-  char rawIP[15];
+    initialLoad = false;  // Change the initialLoad flag to false
+ 
+    // Load the contacts
+    ifstream contactsFile;
+    contactsFile.open(CONTACTS_FILE);
 
-  // Make sure file is open before reading
-  if(contactsFile.is_open()) {
-    contactsFile >> rawIP;
-    // Read until the end of file
-    while(!contactsFile.eof()) {
-      contactList->addItem(new QListWidgetItem(onlineStatusIcon(false), rawIP));
+    // Placeholders
+    char rawIP[15];
+
+    // Make sure file is open before reading
+    if(contactsFile.is_open()) {
       contactsFile >> rawIP;
-    }
+      // Read until the end of file
+      while(!contactsFile.eof()) {
+        contactList->addItem(new QListWidgetItem(onlineStatusIcon(false), rawIP));
+        contactsFile >> rawIP;
+      }
 
-    // Close the contacts file
-    contactsFile.close(); 
+      // Close the contacts file
+      contactsFile.close(); 
+    } 
   }
 }
 // (END) setEnvironment
@@ -628,7 +635,7 @@ void MainWindow::receivedMessage(QString IP, QString message) {
   QWidget *conversation = grabConversation(IP);
 
   // Display the message in that window
-  conversations->widget(conversations->indexOf(conversation))->findChild<ConversationBox*>()->append("<span style='color:blue;'>"+IP+":</span> "+message);
+  conversations->widget(conversations->indexOf(conversation))->findChild<ConversationBox*>()->append(message);
 }
 // (END) receivedMessage
 

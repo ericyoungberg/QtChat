@@ -33,10 +33,10 @@ signals:
   void settingsUpdated();
 private:
   QLineEdit *userNameEdit;
-  QLineEdit *realNameEdit;
+  QLineEdit *userColorEdit;
 
   QLabel *userNameLabel;
-  QLabel *realNameLabel;
+  QLabel *userColorLabel;
 
   QPushButton *saveButton;
   QPushButton *cancelButton;

@@ -30,11 +30,11 @@ ChatSettings::ChatSettings(QWidget *parent) : QDialog(parent) {
   // Define
   userNameLabel = new QLabel(tr("Username: "));
   userNameLabel->setMinimumHeight(20);
-  realNameLabel = new QLabel(tr("Real name: "));
-  realNameLabel->setMinimumHeight(27);
+  userColorLabel = new QLabel(tr("Color: "));
+  userColorLabel->setMinimumHeight(27);
 
   userNameEdit = new QLineEdit;
-  realNameEdit = new QLineEdit;
+  userColorEdit = new QLineEdit;
 
   saveButton = new QPushButton(tr("Save"));
   saveButton->setDefault(true);
@@ -43,14 +43,14 @@ ChatSettings::ChatSettings(QWidget *parent) : QDialog(parent) {
 
   // Setup
   labelLayout->addWidget(userNameLabel);
-  labelLayout->addWidget(realNameLabel);
+  labelLayout->addWidget(userColorLabel);
   labelLayout->addStretch();
 
   buttonLayout->addWidget(saveButton);
   buttonLayout->addWidget(cancelButton);
 
   inputLayout->addWidget(userNameEdit);
-  inputLayout->addWidget(realNameEdit);
+  inputLayout->addWidget(userColorEdit);
   inputLayout->addLayout(buttonLayout);
 
   mainLayout->addLayout(labelLayout);
@@ -90,8 +90,8 @@ ChatSettings::ChatSettings(QWidget *parent) : QDialog(parent) {
 //----------------------------------------------------------------------
 void ChatSettings::loadSettings() {
   QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
-  userNameEdit->setText(settings.value("user_name", "").toString());
-  realNameEdit->setText(settings.value("real_name", "").toString());
+  userNameEdit->setText(settings.value("user_name", "NewUser").toString());
+  userColorEdit->setText(settings.value("user_color", "red").toString());
 }
 // (END) loadSettings
 
@@ -104,7 +104,7 @@ void ChatSettings::loadSettings() {
 void ChatSettings::saveSettings() {
   QSettings settings(SETTINGS_FILE, QSettings::IniFormat);
   settings.setValue("user_name", userNameEdit->text());
-  settings.setValue("real_name", realNameEdit->text());
+  settings.setValue("user_color", userColorEdit->text());
 
   emit settingsUpdated();
   close();
