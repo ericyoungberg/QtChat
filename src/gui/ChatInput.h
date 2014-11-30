@@ -1,6 +1,6 @@
 /*
- * FILE: chatinput.h
- * Defines the ChatInput class. See chatinput.cpp for further info.
+ * FILE: ChatInput.h
+ * Defines the ChatInput class. See ChatInput.cpp for further info.
  */
 
 #ifndef CHATINPUT_H

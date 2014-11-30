@@ -1,6 +1,6 @@
 /*
  * APPLICATION: QtChat
- * A UNIX chat application
+ * A P2P UNIX chat application built with Qt
  *
  * FILE: main.cpp
  * Where the magic begins
@@ -13,7 +13,8 @@
 #include <unistd.h>
 #include <sys/prctl.h>
 #include <signal.h>
-#include "gui/mainwindow.h"
+
+#include "gui/MainWindow.h"
 #include "net/NetworkHandler.h"
 
 using std::cout;
@@ -35,7 +36,8 @@ int main(int argc, char *argv[]) {
   // The first for the network listener
   // The second for the GUI
   if(!fork()) {
-    prctl(PR_SET_PDEATHSIG, SIGHUP);
+
+    prctl(PR_SET_PDEATHSIG, SIGHUP);  // Make sure that the child process gets killed when the parent does
 
     // Create a listener to accept incoming connections for the GUI
     NetworkHandler *network = new NetworkHandler();

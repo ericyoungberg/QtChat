@@ -1,12 +1,12 @@
 /*
- * FILE: newcontactdialog.cpp
+ * FILE: NewContactDialog.cpp
  * Declares the NewContactDialog class along with all of its methods.
  */
 
 #include <QtGui>
 #include <QtWidgets>
-#include "newcontactdialog.h"
 
+#include "NewContactDialog.h"
 
 
 //----------------------------------------------------------------------

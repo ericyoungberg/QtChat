@@ -1,3 +1,8 @@
+/*
+ * FILE: ConversationBox.h
+ * Declares the ConversationBox class along with all of its methods.
+ */
+
 #ifndef CONVERSATIONBOX_H
 #define CONVERSATIONBOX_H
 

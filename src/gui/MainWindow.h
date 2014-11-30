@@ -1,13 +1,14 @@
 /*
- * FILE: mainwindow.h
+ * FILE: MainWindow.h
  * Defines the MainWindow class
- * Further class info in the mainwindow.cpp file
+ * Further class info in the MainWindow.cpp file
  */
 
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+
 #include "../net/NetworkHandler.h"
 #include "../net/ChatInterface.h"
 

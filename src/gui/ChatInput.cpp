@@ -1,11 +1,12 @@
 /*
- * FILE: chatinput.cpp
+ * FILE: ChatInput.cpp
  * Declares the ChatInput class along with all of its methods.
  */
 
 #include <QTextEdit>
 #include <QKeyEvent>
-#include "chatinput.h"
+
+#include "ChatInput.h"
 
 
 //----------------------------------------------------------------------

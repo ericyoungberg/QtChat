@@ -1,6 +1,6 @@
 /*
- * FILE: helpers.cpp
- * A couple of helper functions of mine that don't belong in any class
+ * FILE: Helpers.cpp
+ * A couple of helper functions that don't belong in any class
  */
 
 #include <QtWidgets>

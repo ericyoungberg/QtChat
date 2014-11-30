@@ -1,6 +1,12 @@
+/*
+ * FILE: ConversationBox.cpp
+ * Declares the ConversationBox class along with all of its methods.
+ */
+
 #include <QFile>
 #include <iostream>
-#include "conversationbox.h"
+
+#include "ConversationBox.h"
 
 using std::cout;
 using std::endl;

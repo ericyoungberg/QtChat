@@ -1,5 +1,5 @@
 /*
- * FILE: mainwindow.cpp
+ * FILE: MainWindow.cpp
  * Declares the MainWindow class along with all of its methods.
  */
 
@@ -9,12 +9,13 @@
 #include <fstream>
 #include <iostream>
 #include <sys/stat.h>
-#include "helpers.h"
-#include "mainwindow.h"
-#include "conversationbox.h"
-#include "chatsettings.h"
-#include "newcontactdialog.h"
-#include "chatinput.h"
+
+#include "Helpers.h"
+#include "MainWindow.h"
+#include "ConversationBox.h"
+#include "ChatSettings.h"
+#include "NewContactDialog.h"
+#include "ChatInput.h"
 #include "../net/NetworkHandler.h"
 #include "../net/ChatAdaptor.h"
 #include "../net/ChatInterface.h"

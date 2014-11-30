@@ -1,11 +1,12 @@
 /*
- * FILE: chatsettings.cpp
+ * FILE: ChatSettings.cpp
  * Declares the ChatSettings class along with all of its methods.
  */
 
 #include <QtGui>
 #include <QtWidgets>
-#include "chatsettings.h"
+
+#include "ChatSettings.h"
 
 #define SETTINGS_FILE "resources/settings.ini"
 

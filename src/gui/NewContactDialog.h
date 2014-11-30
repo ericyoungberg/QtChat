@@ -1,6 +1,6 @@
 /*
- * FILE: newcontactdialog.h
- * Defines the NewContactDialog class. See newcontactdialog.cpp for further info.
+ * FILE: NewContactDialog.h
+ * Defines the NewContactDialog class. See NewContactDialog.cpp for further info.
  */
 
 #ifndef NEWCONTACTDIALOG_H

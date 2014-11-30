@@ -1,3 +1,8 @@
+/*
+ * FILE: ChatSettings.h
+ * Declares the ChatSettings class along with all of its methods.
+ */
+
 #ifndef CHATSETTINGS_H
 #define CHATSETTINGS_H
 
