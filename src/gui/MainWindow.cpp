@@ -647,6 +647,9 @@ void MainWindow::loggedOff(QString IP) {
   // Change the online status of that user
   toggleOnlineStatus(IP, false);
 
+  // Delete the connection from the connections vector stored in the NetworkHandler
+  network->deleteOutwardConnection(stripQ(IP));
+
   // Find the conversation window
   QWidget *conversation = grabConversation(IP, false);
 

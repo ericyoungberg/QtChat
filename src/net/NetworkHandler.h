@@ -45,6 +45,7 @@ public:
   void createListener();
 
   int createOutwardConnection(char*);
+  void deleteOutwardConnection(char*);
 
 signals:
   void queueRouter(QString, QString);

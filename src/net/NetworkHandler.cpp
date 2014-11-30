@@ -63,10 +63,25 @@ void NetworkHandler::transmit(char* IP, char* message) {
 
   // If we didn't find a connection with this user, let's try building one
   // then re-transmit the message
-  if(createOutwardConnection(IP) == 0) transmit(IP, message);
+  if(createOutwardConnection(IP) == 0) {
+    cout << "Recreated connection ... \n";
+    transmit(IP, message);
+  }
 
 }
 // (END) transmit
+
+
+void NetworkHandler::deleteOutwardConnection(char* IP) {
+
+  // Find a connection that matches the IP destination passed to the method
+  for(unsigned i=0;i<connections.size();i++) {
+    if(strcmp(connections.at(i).IP, IP) == 0) {
+      connections.erase(i); // Remove the connection from the list of current connections
+    }
+  }
+}
+// (END) deleteOutwardConnection
 
 
 //----------------------------------------------------------------------
@@ -231,12 +246,16 @@ void NetworkHandler::createListener() {
 
           // Try to receive data on the socket
           if((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
+            
+            cout << "DELETING " << i << endl;
 
             // Close the socket if we have lose the connection 
             FD_CLR(i, &master);
             close(i);
 
           } else {  // If we did receive something from the connection
+
+            cout << "SOCK: " << i << ", MAX: " << fdmax << endl;
 
             // Grab only the current size of the message from the buffer
             buf[nbytes] = '\0';
