@@ -12,6 +12,10 @@ class QLabel;
 class QLineEdit;
 class QPushButton;
 
+// ------------------------------------------------------------
+// CLASS: NewContactDialog
+// The dialog for adding new IPs to your contact list
+// ------------------------------------------------------------
 class NewContactDialog : public QDialog
 {
   Q_OBJECT
@@ -31,5 +35,6 @@ private:
   QPushButton *cancelButton;
   QPushButton *findButton;
 };
+// (END) NewContactDialog
 
 #endif

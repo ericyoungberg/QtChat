@@ -25,7 +25,7 @@ NewContactDialog::NewContactDialog(QWidget *parent) : QDialog(parent) {
   addPromptLabel = new QLabel(tr("Enter the user's IP address"));   // define
   addressInput = new QLineEdit; 
 
-  findButton = new QPushButton(tr("Find"));
+  findButton = new QPushButton(tr("Add"));
   findButton->setDefault(true);
   cancelButton = new QPushButton(tr("Cancel"));
 

@@ -4,6 +4,11 @@
 #include <QtDBus>
 #include "NetworkHandler.h"
 
+// -------------------------------------------------------------
+// CLASS: ChatAdaptor
+// Creates an adaptor to connect to D-Bus and send signals to 
+// other processes
+// -------------------------------------------------------------
 class ChatAdaptor : public QDBusAbstractAdaptor
 {
   Q_OBJECT
@@ -17,5 +22,6 @@ signals:
   void queueRouter(QString, QString);
 
 };
+// (END) ChatAdaptor
 
 #endif

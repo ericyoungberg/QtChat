@@ -18,13 +18,6 @@ ChatInput::ChatInput() {
 // (END) ChatInput
 
 
-/*
- * ---------------------------|
- * METHODS                    |
- * ---------------------------|
-*/
-
-
 //----------------------------------------------------------------------
 // METHOD: keyPressEvent
 // Overrides the protected key press event

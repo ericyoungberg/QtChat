@@ -7,6 +7,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <cstdlib>
+
 #include "NetworkHandler.h"
 #include "ChatAdaptor.h"
 #include "ChatInterface.h"
@@ -16,7 +17,12 @@ using namespace std;
 // Universal application port
 const char* PORT = "2255";
 
-// Blank constructor
+
+//----------------------------------------------------------------------
+// METHOD: NetworkHandler
+// Attaches an D-Bus adaptor to this QObject so we can communicate
+// with the GUI process
+//----------------------------------------------------------------------
 NetworkHandler::NetworkHandler() {
 
   // Add the Network Handler to the the D-Bus
@@ -34,9 +40,6 @@ NetworkHandler::NetworkHandler() {
 // Finds an existing socket and sends a message across it
 //----------------------------------------------------------------------
 void NetworkHandler::transmit(char* IP, char* message) {
-
-
-  cout << "OUT: " << message << ", IP: " << IP << endl;
 
   // Number of bytes sent
   int nbytes;
@@ -58,10 +61,7 @@ void NetworkHandler::transmit(char* IP, char* message) {
 
   // If we didn't find a connection with this user, let's try building one
   // then re-transmit the message
-  if(createOutwardConnection(IP) == 0) {
-    cout << "TRANSMIT RETRIED... AND SUCCEEDED! SHREKT M8!\n";
-    transmit(IP, message);
-  }
+  if(createOutwardConnection(IP) == 0) transmit(IP, message);
 
 }
 // (END) transmit
@@ -98,7 +98,7 @@ int NetworkHandler::createOutwardConnection(char* IP) {
 
   // Connect the socket
   if(::connect(sockfd, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
-    cout << "Connection is futile!\n"; 
+    cout << "Connection unsuccessful\n"; 
     return -1;
   }
 
@@ -121,95 +121,123 @@ int NetworkHandler::createOutwardConnection(char* IP) {
 //----------------------------------------------------------------------
 void NetworkHandler::createListener() {
 
-  fd_set master,
-         read_fds;
-  int fdmax;
+  fd_set master,    // Master socket set
+         read_fds;  // Copy of the master set
+  int fdmax;        // Max socket descriptor within the set
 
-  char buf[1024];
-  int nbytes;
+  char buf[1024];   // Buffer
+  int nbytes;       // Number of bytes received
 
-  char rawIP[24];
+  char rawIP[24];   // The IP address before it has been wrapped in Qt Classes
 
-  int yes = 1;
-  int i;
-  int listener,
-      newfd,
-      status;
+  int yes = 1;      // Used as reference to an integer
+  int i;            // Iterator count
+  int listener,     // Listener descriptor
+      newfd,        // New file descriptor that is accepted
+      status;       // The error status for setting up the socket/listener
 
-  struct addrinfo hints;
-  struct addrinfo *servinfo;
+  struct addrinfo hints;      // Struct for storing address hints
+  struct addrinfo *servinfo;  // The server/listener info 
 
-  socklen_t addrlen;
+  socklen_t addrlen;          // The base length of an address
 
-  struct sockaddr_storage remote_addr;
+  struct sockaddr_storage remote_addr;  // Storage placeholder for the client address info
 
+  // Reset the Socket FD set
   FD_ZERO(&master);
   FD_ZERO(&read_fds);
 
+  // Setup the hints for creating the address info structure
   memset(&hints, 0, sizeof(hints));
   hints.ai_family = AF_UNSPEC;
   hints.ai_socktype = SOCK_STREAM;
   hints.ai_flags = AI_PASSIVE;
 
+  // Make the address info
   if((status = getaddrinfo(NULL, PORT, &hints, &servinfo)) != 0) {
     cout << "Could not create addr\n\n";
     exit(1);
   }
 
+  // Create the listener socket
   if((listener = socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol)) == -1) {
     cout << "Could not create the socket\n\n";
     exit(1);
   }
 
+  // Make sure that we can bind this socket on restart just incase it didn't flush on exit
   if(setsockopt(listener, SOL_SOCKET, SO_REUSEADDR, &yes, sizeof(int)) == -1) {
     cout << "Could not clear the port for reuse\n\n";
     exit(1);
   }
 
+  // Binds the listener socket to the port
   if(bind(listener, servinfo->ai_addr, servinfo->ai_addrlen) == -1) {
     cout << "Could not bind the socket\n\n";
     exit(1);
   }
 
+  // Clear the server info struct since we no longer need it
   freeaddrinfo(servinfo);
 
+  // Listen for new connections
   if(listen(listener, 10) == -1) {
     cout << "Can't listen on the socket\n\n";
     exit(1);
   }
 
+  // Pour the accepted connections into the master set
   FD_SET(listener, &master);
 
+  // Set the initial socket max to the listener
   fdmax = listener;
 
+  // Time to listen
   while(true) {
-    read_fds = master; 
+
+    read_fds = master;  // Copy over the the master set each time so you don't overwrite the currently open connections
+
+    // Look/select sockets to check for state changes
     if(select(fdmax+1, &read_fds, NULL, NULL, NULL) == -1) {
       cout << "Couldn't start select\n\n";
       exit(1);
     }
 
+    // Look through the sockets
     for(i=0;i<=fdmax;i++) {
+
+      // If there is a socket here...
       if(FD_ISSET(i, &read_fds)) {
+        
+        // If the socket found is the listener...
         if(i == listener) {
+
+          // Accept connection
           addrlen = sizeof(remote_addr);
           newfd = accept(listener, (struct sockaddr*)&remote_addr, &addrlen);
+
+          // Check for error
           if(newfd == -1) {
             cout << "Could not accept this connection\n\n";
           } else {
+
+            // If there was a new connection, add it to the master set for now
             FD_SET(newfd, &master);
-            if(newfd > fdmax) fdmax = newfd;
+            if(newfd > fdmax) fdmax = newfd; // Change the max if necessary
           }
-        } else {
+        } else {  // If it was not the listener...
+
+          // Try to receive data on the socket
           if((nbytes = recv(i, buf, sizeof(buf), 0)) <= 0) {
-            close(i);
+
+            // Close the socket if we have lose the connection 
             FD_CLR(i, &master);
-          } else {
+            close(i);
+
+          } else {  // If we did receive something from the connection
 
             // Grab only the current size of the message from the buffer
             buf[nbytes] = '\0';
-
-            cout << "IN: " << buf << endl;
 
             // Get the sender's IP
             status = getpeername(i, (struct sockaddr*)&remote_addr, &addrlen);
@@ -221,7 +249,7 @@ void NetworkHandler::createListener() {
             QString newIP(rawIP);
             QString newMessage(buf);
 
-            emit queueRouter(newIP, newMessage);
+            emit queueRouter(newIP, newMessage);  // Emit the signal across the IPC with the newly received information
           } 
         }
       } 

@@ -9,6 +9,11 @@ class QLineEdit;
 class QLabel;
 class QPushButton;
 
+
+// ----------------------------------------------------------------
+// CLASS: ChatSettings
+// The dialog that pops up to change your arbitrary settings
+// ----------------------------------------------------------------
 class ChatSettings : public QDialog 
 {
   Q_OBJECT
@@ -31,5 +36,6 @@ private:
   QPushButton *saveButton;
   QPushButton *cancelButton;
 };
+// (END) ChatSettings
 
 #endif

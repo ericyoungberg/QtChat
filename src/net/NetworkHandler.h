@@ -11,16 +11,28 @@ class QString;
 
 using std::vector;
 
+
+// -------------------------------------------------------------
+// STRUCT: connection
+// Stores reference information for a socket 
+// -------------------------------------------------------------
 struct connection {
   int sockfd;
   char IP[24];
 
+  // Constructors
   connection(){};
   connection(char* setIP) {
     strcpy(IP, setIP); 
   }
 };
+// (END) connection
 
+
+// -------------------------------------------------------------
+// CLASS: NetworkHandler
+// Handles all network based calls
+// -------------------------------------------------------------
 class NetworkHandler : public QObject
 {
   Q_OBJECT
@@ -42,5 +54,6 @@ private:
 
   ChatInterface *ipc;
 };
+// (END) NetworkHandler
 
 #endif

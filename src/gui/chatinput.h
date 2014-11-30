@@ -8,6 +8,10 @@
 
 #include <QTextEdit>
 
+// ----------------------------------------------------------------
+// CLASS: ChatInput
+// The text box that the user inputs their messages to send
+// ----------------------------------------------------------------
 class ChatInput : public QTextEdit
 {
   Q_OBJECT

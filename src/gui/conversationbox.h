@@ -3,6 +3,11 @@
 
 #include <QTextBrowser>
 
+// ----------------------------------------------------------------
+// CLASS: ConversationBox
+// A widget that gets laid over other ConversationBoxes for
+// switching around conversations without closing them
+// ----------------------------------------------------------------
 class ConversationBox : public QTextBrowser
 {
 public:
@@ -10,5 +15,6 @@ public:
 
   QString conversationID;
 };
+// (END) ConversationBox
 
 #endif

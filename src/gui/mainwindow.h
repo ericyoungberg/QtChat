@@ -26,7 +26,10 @@ class ChatSettings;
 class ConversationBox;
 class QStackedWidget;
 
-
+// ------------------------------------------------------------
+// CLASS: MainWindow
+// The main wrapper that holds everything for the GUI
+// ------------------------------------------------------------
 class MainWindow : public QMainWindow 
 {
   Q_OBJECT
@@ -106,5 +109,6 @@ private:
    QAction *quitAction;
    QAction *settingsAction;
 };
+// (END) MainWindow
 
 #endif

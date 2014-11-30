@@ -5,6 +5,11 @@
 #include <QString>
 #include "NetworkHandler.h"
 
+
+// ---------------------------------------------------------------------------------
+// CLASS: ChatInterface
+// Create the interface in which each D-Bus adapted objects communicate through
+// ---------------------------------------------------------------------------------
 class ChatInterface : public QDBusAbstractInterface
 {
   Q_OBJECT
@@ -21,5 +26,6 @@ signals:
   void queueRouter(QString, QString);
 
 };
+// (END) ChatInterface
 
 #endif
